@@ -1,7 +1,7 @@
 # Planning for SO second midterm
 
 ### Data Structures
-#### Process: storage of a process properties
+#### Process: storage of a process properties | G
     - pid
     - priority
     - arrival time
@@ -10,7 +10,7 @@
     - response time
     - completion time
 
-#### schedule: storage of processes, is a priority queue
+#### schedule: storage of processes, is a priority queue | S
     - processes
     - arrival time line
     - ready queue
@@ -19,7 +19,7 @@
 
 ### Functions
 
-#### turnAroundT:
+#### turnAroundT: | G
 Input:
     - process
 Output:
@@ -28,7 +28,7 @@ Output:
 Description:
 turn around time = completion time - arrival time
 
-#### waitT:
+#### waitT: | S
 Input:
     - process
 Output:
@@ -37,7 +37,7 @@ Output:
 Description:
 wait time = turn around time - burst time
 
-#### responseT:
+#### responseT: | G
 Input:
     - process
 Output:
@@ -45,7 +45,7 @@ Output:
 Description:
 responde time
 
-#### avgTurnAT:
+#### avgTurnAT: | S
 Input:
     - schedule
 Output:
@@ -53,7 +53,7 @@ Output:
 Description:
 avg(turnAroundT(processI))
 
-#### avgWaitT:
+#### avgWaitT: | G
 Input:
     - schedule
 Output:
@@ -61,7 +61,7 @@ Output:
 Description:
 avg(waitT(processI))
 
-#### avgResponseT:
+#### avgResponseT: | S
 Input:
     - schedule
 Output:
@@ -69,7 +69,7 @@ Output:
 Description:
 avg(responseT(processI))
 
-### priorityFCFS:
+### priorityFCFS: | G
 Input:
     - process A
     - process B
@@ -81,7 +81,7 @@ Priority is inversely proportional to arrival time.
 - 0     IF A priority is equal to B priority.
 - 1     IF A priority is greater than B priority.
 
-### prioritySJF:
+### prioritySJF: | S
 Input:
     - process A
     - process B
@@ -93,7 +93,7 @@ Priority is inversely proportional to remaining time.
 - 0     IF A priority is equal to B priority.
 - 1     IF A priority is greater than B priority.
 
-### priorityP:
+### priorityP: | G
 Input:
     - process A
     - process B
@@ -107,14 +107,14 @@ Priority is directly proportional to priority.
 
 ### Processes
 
-#### caller:
+#### caller: | G
 Input:
     - schedule
 Description:
 By the elapsed time in the schedule, enqueue the process from the schedule that
 have already arrived into the ready queue.
 
-#### executeSchedule:
+#### executeSchedule: | G S
 Input:
     - isPreemptive
     - schedule
@@ -125,7 +125,7 @@ We have an actual process that refers some process.
 - While ready queue is not empty do the following:
     - Call the process for actual moment.
     - If there is no actual process or (isPreemptive and the front of the queue is different to the actual process):
-        Asign front of the queue to actual process.
+        Asign front of the queue to actual process. 
     - If there is an actual process:
         - If there still has remaining time:
             - Reduce the remaining time by 1
