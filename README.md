@@ -125,7 +125,7 @@ We have an actual process that refers some process.
 - While ready queue is not empty do the following:
     - Call the process for actual moment.
     - If there is no actual process or (isPreemptive and the front of the queue is different to the actual process):
-        Asign front of the queue to actual process. 
+        Asign front of the queue to actual process.
     - If there is an actual process:
         - If there still has remaining time:
             - Reduce the remaining time by 1
