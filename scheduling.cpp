@@ -10,6 +10,14 @@ int turnAroundT(process p) {
     return p.completionT - p.arrivalT;
 }
 
+int waitT(process p) {
+    if (p.completionT == NOT_COMPLETED) {
+        fprintf(stderr, "Error: Wait Time for non completed process");
+        return NOT_COMPLETED;
+    }
+    return (p.responseT - p.burstT);
+}
+
 int responseT(process p) {
 
     if (p.responseT == NOT_COMPLETED) {
@@ -25,14 +33,6 @@ int avgWaitT(std::vector<process*> procVec) {
     for (std::vector<process*>::iterator it = procVec.begin();
             it!=procVec.end(); it++) total += waitT(*(*it));
     return (total/procVec.size());
-}
-
-int waitT(process p) {
-    if (p.completionT == NOT_COMPLETED) {
-        fprintf(stderr, "Error: Wait Time for non completed process");
-        return NOT_COMPLETED;
-    }
-    return (p.responseT - p.burstT);
 }
 
 int avgTurnAroundT(std::vector<process*> procVec) {
@@ -65,11 +65,9 @@ template <class T>
 void caller(schedule<T>* s) {
 
     std::vector<int> indices = s->arrival[s->elapsed];
-    int i, index;
 
-    for (i = 0; i < indices.size(); i++) {
-        index = indices[i];
-        if (index >= 0 && index < s->processes.size())
-            s->readyQueue.push( (s->processes)[index] );
+    for (std::vector<int>::iterator it = indices.begin();
+            it!=indices.end(); it++) {
+        s->readyQueue.push((s->processes)[*it]);
     }
 }

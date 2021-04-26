@@ -1,5 +1,5 @@
-compile:
-	g++ -c scheduling.cpp -o scheduling.o
+scheduling.o: scheduling.cpp scheduling.h
+	g++ -c scheduling.cpp
 
 clean:
 	rm -f *.o

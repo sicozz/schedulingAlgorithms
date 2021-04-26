@@ -19,9 +19,9 @@ struct process {
 int turnAroundT(process p);
 int waitT(process p);
 int responseT(process p);
-int avgWaitT(std::vector<process*> s);
-int avgTurnAroundT(std::vector<process*> s);
-int avgResponseT(std::vector<process*> s);
+int avgWaitT(std::vector<process*> procVec);
+int avgTurnAroundT(std::vector<process*> procVec);
+int avgResponseT(std::vector<process*> procVec);
 
 class priorityFCFS {
     public:
@@ -46,7 +46,4 @@ struct schedule {
 
 template <class T>
 void caller(schedule<T>* s);
-
-
-
 #endif
