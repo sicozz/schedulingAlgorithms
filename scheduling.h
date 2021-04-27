@@ -24,10 +24,12 @@ struct process {
 
 template <class T>
 struct schedule {
-    std::vector<process*> processes;
-    std::map<int, std::vector<int>> arrival;
-    std::priority_queue<process*, std::vector<process*>, T> readyQueue;
-    int elapsed;
+    public:
+        std::vector<process*> processes;
+        std::map<int, std::vector<int>> arrival;
+        std::priority_queue<process*, std::vector<process*>, T> readyQueue;
+        int elapsed;
+        bool finished;
 };
 
 int turnAroundT(process p);
@@ -50,9 +52,9 @@ class priorityP {
         bool operator() (process* a, process* b);
 };
 
-template <class T>
-void caller(schedule<T>* s);
+//template <class T>
+void caller(schedule<priorityFCFS>* s);
 
-template <class T>
-std::vector<gantt*> executeSchedule(bool isPreemptive, schedule<T> s);
+//template <class T>
+std::vector<gantt*> executeSchedule(bool isPreemptive, schedule<priorityFCFS> s);
 #endif
