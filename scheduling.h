@@ -6,6 +6,12 @@
 
 #define NOT_COMPLETED -1
 
+struct gantt {
+    int i;
+    int f;
+    std::string label;
+};
+
 struct process {
     std::string pid;
     int priority;
@@ -14,6 +20,14 @@ struct process {
     int remainingT;
     int responseT;
     int completionT;
+};
+
+template <class T>
+struct schedule {
+    std::vector<process*> processes;
+    std::map<int, std::vector<int>> arrival;
+    std::priority_queue<process*, std::vector<process*>, T> readyQueue;
+    int elapsed;
 };
 
 int turnAroundT(process p);
@@ -37,13 +51,8 @@ class priorityP {
 };
 
 template <class T>
-struct schedule {
-    std::vector<process*> processes;
-    std::map<int, std::vector<int>> arrival;
-    std::priority_queue<process*, std::vector<process*>, T> readyQueue;
-    int elapsed;
-};
+void caller(schedule<T>* s);
 
 template <class T>
-void caller(schedule<T>* s);
+std::vector<gantt*> executeSchedule(bool isPreemptive, schedule<T> s);
 #endif

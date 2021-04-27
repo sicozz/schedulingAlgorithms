@@ -62,7 +62,7 @@ bool priorityP::operator() (process* a, process* b) {
 }
 
 template <class T>
-void caller(schedule<T>* s) {
+int caller(schedule<T>* s) {
 
     std::vector<int> indices = s->arrival[s->elapsed];
 
@@ -70,4 +70,42 @@ void caller(schedule<T>* s) {
             it!=indices.end(); it++) {
         s->readyQueue.push((s->processes)[*it]);
     }
+    return indices[indices.size()-1];
+}
+
+template <class T>
+std::vector<gantt*> executeSchedule(bool isPreemptive, schedule<T> s) {
+    std::vector<gantt*> ganttDiagram;
+    process* aProcess = NULL;
+    gantt* g = NULL;
+    int start = 0;
+    s.elapsed = 0;
+    while(!s.readyQueue.empty() || (caller(&s)!=s.processes.size()-1)) {
+        if (aProcess==NULL || (isPreemptive && aProcess!=s.readyQueue.top())) {
+            if (aProcess!=NULL) {
+                g = (gantt*) malloc(sizeof(gantt));
+                g->i = start;
+                g->f = s.elapsed;
+                g->label = aProcess->pid;
+            }
+            aProcess = s.readyQueue.top();
+        }
+        if (aProcess!=NULL) {
+            if (aProcess->responseT==NOT_COMPLETED)
+                aProcess->responseT = s.elapsed;
+            if (aProcess->remainingT) aProcess->remainingT--;
+            else {
+                aProcess->completionT = s.elapsed;
+                s.readyQueue.pop();
+                g = (gantt*) malloc(sizeof(gantt));
+                g->i = start;
+                g->f = s.elapsed;
+                g->label = aProcess->pid;
+                aProcess = NULL;
+            }
+        }
+        ganttDiagram.push_back(g);
+        s.elapsed++;
+    }
+    return ganttDiagram;
 }
