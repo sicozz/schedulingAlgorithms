@@ -124,12 +124,13 @@ We have an actual process that refers some process.
 - Set schedule elapsed time to 0
 - While ready queue is not empty do the following:
     - Call the process for actual moment.
-    - If there is no actual process or (isPreemptive and the front of the queue is different to the actual process):
+    - If there is no actual process or (isPreemptive and the front of the queue
+        is different to the actual process):
         Asign front of the queue to actual process.
     - If there is an actual process:
+        - If it doesn't have response time yet, asign it to actual time.
         - If there still has remaining time:
             - Reduce the remaining time by 1
-            - If it doesn't have response time yet, asign it to actual time.
         - Else:
             - Asign actual time to completion time.
             - Pop the queue
