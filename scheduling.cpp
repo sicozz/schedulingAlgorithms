@@ -87,6 +87,7 @@ std::vector<gantt*> executeSchedule(bool isPreemptive, schedule<priorityFCFS> s)
     std::vector<gantt*> ganttDiagram;
     process* aProcess = NULL;
     bool first = true;
+    bool dead = false;
     gantt* g = NULL;
     int start = 0;
     s.elapsed = 0;
@@ -102,9 +103,13 @@ std::vector<gantt*> executeSchedule(bool isPreemptive, schedule<priorityFCFS> s)
             }
             aProcess = s.readyQueue.top();
             if (aProcess!=NULL) {
-                if (!first) aProcess->remainingT--;
+                if (aProcess->pid=="P1") std::cout << "Start " << start << " Elapsed " << s.elapsed << std::endl;
+                if (!first && !dead) aProcess->remainingT--;
             }
-            else start = s.elapsed;
+            if (dead) {
+               start = s.elapsed;
+               dead = false;
+            }
         }
         if (aProcess!=NULL) {
             if (aProcess->responseT==NOT_COMPLETED)
@@ -121,6 +126,7 @@ std::vector<gantt*> executeSchedule(bool isPreemptive, schedule<priorityFCFS> s)
                 s.readyQueue.pop();
                 start = s.elapsed;
                 first = false;
+                if (s.readyQueue.empty()) dead = true;
             }
         }
         s.elapsed++;
