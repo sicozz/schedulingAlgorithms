@@ -7,9 +7,9 @@
 #define NOT_COMPLETED -1
 
 struct gantt {
+    std::string label;
     int i;
     int f;
-    std::string label;
 };
 
 struct process {
@@ -22,16 +22,6 @@ struct process {
     int completionT;
 };
 
-template <class T>
-struct schedule {
-    public:
-        std::vector<process*> processes;
-        std::map<int, std::vector<int>> arrival;
-        std::priority_queue<process*, std::vector<process*>, T> readyQueue;
-        int elapsed;
-        bool finished;
-};
-
 int turnAroundT(process p);
 int waitT(process p);
 int responseT(process p);
@@ -39,22 +29,14 @@ int avgWaitT(std::vector<process*> procVec);
 int avgTurnAroundT(std::vector<process*> procVec);
 int avgResponseT(std::vector<process*> procVec);
 
-class priorityFCFS {
+class scheduleSJF {
+    private:
+        std::vector<process*> processes;
+        int elapsed;
+        process* fetch();
     public:
-        bool operator() (process* a, process* b);
+        bool finished();
+        scheduleSJF(std::vector<process*> processes);
+        void execute(std::vector<gantt*>* g);
 };
-class prioritySJF {
-    public:
-        bool operator() (process* a, process* b);
-};
-class priorityP {
-    public:
-        bool operator() (process* a, process* b);
-};
-
-//template <class T>
-void caller(schedule<priorityFCFS>* s);
-
-//template <class T>
-std::vector<gantt*> executeSchedule(bool isPreemptive, schedule<priorityFCFS> s);
 #endif

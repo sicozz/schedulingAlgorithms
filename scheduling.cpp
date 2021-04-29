@@ -49,87 +49,68 @@ int avgResponseT(std::vector<process*> procVec) {
     return (total/procVec.size());
 }
 
-bool priorityFCFS::operator() (process* a, process* b) {
-    return (a->arrivalT > b->arrivalT);
+scheduleSJF::scheduleSJF(std::vector<process*> processes) {
+    this->processes = processes;
+    this->elapsed = 0;
 }
 
-bool prioritySJF::operator() (process* a, process* b) {
-    return (a->remainingT > b->remainingT);
-}
-
-bool priorityP::operator() (process* a, process* b) {
-    return (a->priority > b->priority);
-}
-
-void caller(schedule<priorityFCFS>* s) {
-    std::vector<int> indices = s->arrival[s->elapsed];
-
-    for (std::vector<int>::iterator it = indices.begin();
-            it!=indices.end(); it++) {
-        s->readyQueue.push((s->processes)[*it]);
+bool scheduleSJF::finished() {
+    bool ans = true;
+    std::vector<process*>::iterator it = processes.begin();
+    while(it!=processes.end() && ans) {
+        if ((*it)->remainingT!=0) ans = false;
+        it++;
     }
-    if (indices.size()) {
-        if (indices[indices.size()-1]==s->processes.size()-1) s->finished = true;
-    }
+    return ans;
 }
 
-void logger(schedule<priorityFCFS> s, process* p) {
-    std::cout << "---------------" << std::endl; 
-    std::cout << "Top" << std::endl; 
-    if (s.readyQueue.top()!=NULL) std::cout << s.readyQueue.top()->pid << std::endl; 
-    else std::cout << "NULL top" << std::endl; 
-    std::cout << "aProcess" << std::endl; 
-    if (p!=NULL) std::cout << p->pid << std::endl; 
-    else std::cout << "NULL aProcess" << std::endl; 
-    std::cout << "---------------" << std::endl; 
-}
-std::vector<gantt*> executeSchedule(bool isPreemptive, schedule<priorityFCFS> s) {
-    std::vector<gantt*> ganttDiagram;
-    process* aProcess = NULL;
-    bool first = true;
-    bool dead = false;
-    gantt* g = NULL;
-    int start = 0;
-    s.elapsed = 0;
-    while(!s.readyQueue.empty() || !s.finished) {
-        caller(&s);
-        if (aProcess==NULL || (isPreemptive && aProcess!=s.readyQueue.top())) {
-            if (aProcess!=NULL) {
-                g = new gantt;
-                g->i = start;
-                g->f = s.elapsed;
-                g->label = aProcess->pid;
-                ganttDiagram.push_back(g);
-            }
-            aProcess = s.readyQueue.top();
-            if (aProcess!=NULL) {
-                if (aProcess->pid=="P1") std::cout << "Start " << start << " Elapsed " << s.elapsed << std::endl;
-                if (!first && !dead) aProcess->remainingT--;
-            }
-            if (dead) {
-               start = s.elapsed;
-               dead = false;
+process* scheduleSJF::fetch() {
+    process* topProc = NULL;
+    for (std::vector<process*>::iterator it = processes.begin();
+            it!=processes.end(); it++) {
+        if (topProc==NULL && (*it)->arrivalT<=elapsed && (*it)->remainingT!=0) topProc = (*it);
+        else {
+            if ((*it)->arrivalT<=elapsed && (*it)->remainingT!=0) {
+                if ((*it)->remainingT==topProc->remainingT) {
+                    if ((*it)->arrivalT<topProc->arrivalT) topProc = (*it);
+                }
+                else {
+                    if ((*it)->remainingT<topProc->remainingT) topProc = (*it);
+                }
             }
         }
-        if (aProcess!=NULL) {
-            if (aProcess->responseT==NOT_COMPLETED)
-                aProcess->responseT = s.elapsed;
-            if (aProcess->remainingT) aProcess->remainingT--;
+    }
+    return topProc;
+}
+void scheduleSJF::execute(std::vector<gantt*>* g) {
+    process* aProc = NULL;
+    gantt* aGantt = new gantt {"X", 0, -1};
+    aGantt->i = 0;
+    while(!this->finished()){
+        if (aProc==NULL) {
+            aProc = this->fetch();
+            if (aProc!=NULL) {
+                aGantt->f = elapsed;
+                if (aGantt->i!=aGantt->f) g->push_back(aGantt);
+                aGantt = new gantt {aProc->pid, elapsed, -1};
+            }
+        }
+        if (aProc!=NULL) {
+            if (aProc->responseT==-1) aProc->responseT=elapsed;
+            if (aProc->remainingT!=0) aProc->remainingT--;
             else {
-                aProcess->completionT = s.elapsed;
-                g = new gantt;
-                g->i = start;
-                g->f = s.elapsed;
-                g->label = aProcess->pid;
-                ganttDiagram.push_back(g);
-                aProcess = NULL;
-                s.readyQueue.pop();
-                start = s.elapsed;
-                first = false;
-                if (s.readyQueue.empty()) dead = true;
+                aProc->completionT = elapsed;
+                aGantt->f = elapsed;
+                if (aGantt->i!=aGantt->f) g->push_back(aGantt);
+                aGantt = new gantt {"X", elapsed, -1};
+                aProc = this->fetch();
+                if (aProc!=NULL) aGantt->label = aProc->pid;
             }
         }
-        s.elapsed++;
+        elapsed++;
     }
-    return ganttDiagram;
+    aProc->completionT = elapsed;
+    aGantt->f = elapsed;
+    if (aGantt->i!=aGantt->f) g->push_back(aGantt);
 }
+
