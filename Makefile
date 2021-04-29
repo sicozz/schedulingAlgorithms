@@ -9,4 +9,3 @@ scheduling.o: scheduling.cpp scheduling.h
 
 clean:
 	rm -f *.o
-	rm main

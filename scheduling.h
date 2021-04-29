@@ -37,6 +37,7 @@ class scheduleSJF {
     public:
         bool finished();
         scheduleSJF(std::vector<process*> processes);
-        void execute(std::vector<gantt*>* g);
+        void executeNonPreemptive(std::vector<gantt*>* g);
+        void executePreemptive(std::vector<gantt*>* g);
 };
 #endif
