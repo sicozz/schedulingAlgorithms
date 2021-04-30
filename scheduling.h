@@ -34,10 +34,10 @@ class scheduleSJF {
         std::vector<process*> processes;
         int elapsed;
         process* fetch();
-    public:
         bool finished();
+    public:
         scheduleSJF(std::vector<process*> processes);
-        void executeNonPreemptive(std::vector<gantt*>* g);
-        void executePreemptive(std::vector<gantt*>* g);
+        void executeNonPreemptive(std::vector<gantt*>* g, int cct);
+        void executePreemptive(std::vector<gantt*>* g, int cct);
 };
 #endif

@@ -68,7 +68,8 @@ process* scheduleSJF::fetch() {
     process* topProc = NULL;
     for (std::vector<process*>::iterator it = processes.begin();
             it!=processes.end(); it++) {
-        if (topProc==NULL && (*it)->arrivalT<=elapsed && (*it)->remainingT!=0) topProc = (*it);
+        if (topProc==NULL && (*it)->arrivalT<=elapsed && (*it)->remainingT!=0)
+            topProc = (*it);
         else {
             if ((*it)->arrivalT<=elapsed && (*it)->remainingT!=0) {
                 if ((*it)->remainingT==topProc->remainingT) {
@@ -83,16 +84,16 @@ process* scheduleSJF::fetch() {
     return topProc;
 }
 
-void scheduleSJF::executeNonPreemptive(std::vector<gantt*>* g) {
+void scheduleSJF::executeNonPreemptive(std::vector<gantt*>* g, int cct) {
     process* aProc = NULL;
     gantt* aGantt = new gantt {"X", 0, -1};
-    aGantt->i = 0;
     while(!this->finished()){
         if (aProc==NULL) {
             aProc = this->fetch();
             if (aProc!=NULL) {
                 aGantt->f = elapsed;
                 if (aGantt->i!=aGantt->f) g->push_back(aGantt);
+                elapsed += cct;
                 aGantt = new gantt {aProc->pid, elapsed, -1};
             }
         }
@@ -103,6 +104,7 @@ void scheduleSJF::executeNonPreemptive(std::vector<gantt*>* g) {
                 aProc->completionT = elapsed;
                 aGantt->f = elapsed;
                 if (aGantt->i!=aGantt->f) g->push_back(aGantt);
+                elapsed += cct;
                 aGantt = new gantt {"X", elapsed, -1};
                 aProc = this->fetch();
                 if (aProc!=NULL) aGantt->label = aProc->pid;
@@ -115,7 +117,7 @@ void scheduleSJF::executeNonPreemptive(std::vector<gantt*>* g) {
     if (aGantt->i!=aGantt->f) g->push_back(aGantt);
 }
 
-void scheduleSJF::executePreemptive(std::vector<gantt*>* g) {
+void scheduleSJF::executePreemptive(std::vector<gantt*>* g, int cct) {
     process* aProc = NULL;
     gantt* aGantt = new gantt {"X", 0, -1};
     aGantt->i = 0;
@@ -125,6 +127,7 @@ void scheduleSJF::executePreemptive(std::vector<gantt*>* g) {
             if (aGantt->label!=aProc->pid) {
                 aGantt->f = elapsed;
                 if (aGantt->i!=aGantt->f) g->push_back(aGantt);
+                elapsed += cct;
                 aGantt = new gantt {aProc->pid, elapsed, -1};
             }
         }
@@ -135,6 +138,7 @@ void scheduleSJF::executePreemptive(std::vector<gantt*>* g) {
                 aProc->completionT = elapsed;
                 aGantt->f = elapsed;
                 if (aGantt->i!=aGantt->f) g->push_back(aGantt);
+                elapsed += cct;
                 aGantt = new gantt {"X", elapsed, -1};
                 aProc = this->fetch();
                 if (aProc!=NULL) aGantt->label = aProc->pid;

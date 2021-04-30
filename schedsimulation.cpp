@@ -23,7 +23,7 @@ int main() {
     vector<process*> p = parser();
     vector<gantt*> ganttDiagram;
     scheduleSJF s(p);
-    s.executePreemptive(&ganttDiagram);
+    s.executePreemptive(&ganttDiagram, 1);
     for (auto it = ganttDiagram.begin(); it!=ganttDiagram.end(); it++)
         cout << (*it)->label << " " << (*it)->i << " " << (*it)->f << endl;
     return 0;
