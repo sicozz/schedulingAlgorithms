@@ -5,9 +5,11 @@
 #include <queue>
 #include "gantt.h"
 
-#define NOT_COMPLETED -1
-
-
+struct gantt {
+    std::string label;
+    int i;
+    int f;
+};
 
 struct process {
     std::string pid;
@@ -38,16 +40,15 @@ class scheduleSJF {
         void executePreemptive(std::vector<gantt*>* g, int cct);
 };
 
-
-class scheduleSCF {
+class schedulePrio {
     private:
         std::vector<process*> processes;
         int elapsed;
         process* fetch();
         bool finished();
     public:
-        scheduleSCF(std::vector<process*> processes);
+        schedulePrio(std::vector<process*> processes);
         void executeNonPreemptive(std::vector<gantt*>* g, int cct);
+        void executePreemptive(std::vector<gantt*>* g, int cct);
 };
-
 #endif

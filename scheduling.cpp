@@ -151,13 +151,12 @@ void scheduleSJF::executePreemptive(std::vector<gantt*>* g, int cct) {
     if (aGantt->i!=aGantt->f) g->push_back(aGantt);
 }
 
-
-scheduleSCF::scheduleSCF(std::vector<process*> processes) {
+schedulePrio::schedulePrio(std::vector<process*> processes) {
     this->processes = processes;
     this->elapsed = 0;
 }
 
-bool scheduleSCF::finished() {
+bool schedulePrio::finished() {
     bool ans = true;
     std::vector<process*>::iterator it = processes.begin();
     while(it!=processes.end() && ans) {
@@ -167,19 +166,27 @@ bool scheduleSCF::finished() {
     return ans;
 }
 
-process* scheduleSCF::fetch() {
+process* schedulePrio::fetch() {
     process* topProc = NULL;
     for (std::vector<process*>::iterator it = processes.begin();
-            it!=processes.end() && topProc == NULL; it++) {
-
+            it!=processes.end(); it++) {
         if (topProc==NULL && (*it)->arrivalT<=elapsed && (*it)->remainingT!=0)
             topProc = (*it);
-
+        else {
+            if ((*it)->arrivalT<=elapsed && (*it)->remainingT!=0) {
+                if ((*it)->priority==topProc->priority) {
+                    if ((*it)->arrivalT<topProc->arrivalT) topProc = (*it);
+                }
+                else {
+                    if ((*it)->priority<topProc->priority) topProc = (*it);
+                }
+            }
+        }
     }
     return topProc;
 }
 
-void scheduleSCF::executeNonPreemptive(std::vector<gantt*>* g, int cct) {
+void schedulePrio::executeNonPreemptive(std::vector<gantt*>* g, int cct) {
     process* aProc = NULL;
     gantt* aGantt = new gantt {"X", 0, -1};
     while(!this->finished()){
@@ -202,10 +209,7 @@ void scheduleSCF::executeNonPreemptive(std::vector<gantt*>* g, int cct) {
                 elapsed += cct;
                 aGantt = new gantt {"X", elapsed, -1};
                 aProc = this->fetch();
-                if (aProc!=NULL) {
-                    aGantt->label = aProc->pid;
-                    elapsed = elapsed - 1;
-                }
+                if (aProc!=NULL) aGantt->label = aProc->pid;
             }
         }
         elapsed++;
@@ -214,3 +218,38 @@ void scheduleSCF::executeNonPreemptive(std::vector<gantt*>* g, int cct) {
     aGantt->f = elapsed;
     if (aGantt->i!=aGantt->f) g->push_back(aGantt);
 }
+
+void schedulePrio::executePreemptive(std::vector<gantt*>* g, int cct) {
+    process* aProc = NULL;
+    gantt* aGantt = new gantt {"X", 0, -1};
+    aGantt->i = 0;
+    while(!this->finished()){
+        aProc = this->fetch();
+        if (aProc!=NULL) {
+            if (aGantt->label!=aProc->pid) {
+                aGantt->f = elapsed;
+                if (aGantt->i!=aGantt->f) g->push_back(aGantt);
+                elapsed += cct;
+                aGantt = new gantt {aProc->pid, elapsed, -1};
+            }
+        }
+        if (aProc!=NULL) {
+            if (aProc->responseT==-1) aProc->responseT=elapsed;
+            if (aProc->remainingT!=0) aProc->remainingT--;
+            else {
+                aProc->completionT = elapsed;
+                aGantt->f = elapsed;
+                if (aGantt->i!=aGantt->f) g->push_back(aGantt);
+                elapsed += cct;
+                aGantt = new gantt {"X", elapsed, -1};
+                aProc = this->fetch();
+                if (aProc!=NULL) aGantt->label = aProc->pid;
+            }
+        }
+        elapsed++;
+    }
+    aProc->completionT = elapsed;
+    aGantt->f = elapsed;
+    if (aGantt->i!=aGantt->f) g->push_back(aGantt);
+}
+
