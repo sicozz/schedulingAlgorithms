@@ -19,7 +19,7 @@ int main() {
     process p4 = {"P4", 0, 8, 5, 5, -1, -1};
     p.push_back(&p1);p.push_back(&p2);p.push_back(&p3);p.push_back(&p4);
     scheduleSJF s(p);
-    s.executePreemptive(&ganttDiagram);
+    s.executePreemptive(&ganttDiagram, 0);
     for (auto it = ganttDiagram.begin(); it!=ganttDiagram.end(); it++)
         cout << (*it)->label << " " << (*it)->i << " " << (*it)->f << endl;
     return 0;

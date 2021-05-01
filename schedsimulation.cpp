@@ -16,15 +16,19 @@ vector<process*> parser() {
         procVec.push_back(proc);
         proc = new process;
     }
+
     return procVec;
 }
 
 int main() {
     vector<process*> p = parser();
     vector<gantt*> ganttDiagram;
-    scheduleSJF s(p);
-    s.executePreemptive(&ganttDiagram, 1);
+    //scheduleSJF s(p);
+    scheduleSCF s(p);
+    s.executeNonPreemptive(&ganttDiagram, 0);
     for (auto it = ganttDiagram.begin(); it!=ganttDiagram.end(); it++)
         cout << (*it)->label << " " << (*it)->i << " " << (*it)->f << endl;
+
+
     return 0;
 }
