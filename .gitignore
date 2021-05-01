@@ -1,3 +1,8 @@
 *.o
 main
 input
+exec
+testCase
+testCase2
+testCase3
+testCase4

@@ -1,5 +1,6 @@
 #include <iostream>
 #include "scheduling.h"
+#include "gantt.h"
 
 using namespace std;
 
@@ -26,9 +27,11 @@ int main() {
     //scheduleSJF s(p);
     scheduleSCF s(p);
     s.executeNonPreemptive(&ganttDiagram, 0);
+    printGannttDiagram(ganttDiagram);
+/* 
     for (auto it = ganttDiagram.begin(); it!=ganttDiagram.end(); it++)
         cout << (*it)->label << " " << (*it)->i << " " << (*it)->f << endl;
-
+*/
 
     return 0;
 }

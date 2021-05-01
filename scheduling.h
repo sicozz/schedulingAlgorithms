@@ -3,14 +3,11 @@
 #include <vector>
 #include <map>
 #include <queue>
+#include "gantt.h"
 
 #define NOT_COMPLETED -1
 
-struct gantt {
-    std::string label;
-    int i;
-    int f;
-};
+
 
 struct process {
     std::string pid;
