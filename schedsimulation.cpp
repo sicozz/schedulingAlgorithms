@@ -24,11 +24,8 @@ vector<process*> parser() {
 int main() {
     vector<process*> p = parser();
     vector<gantt*> ganttDiagram;
-    schedulePrio prio(p);
-    prio.executePreemptive(&ganttDiagram, 0);
-    for (auto it = ganttDiagram.begin(); it!=ganttDiagram.end(); it++)
-        cout << (*it)->label << " " << (*it)->i << " " << (*it)->f << endl;
-*/
-
+    scheduleFCFS s(p);
+    s.executeNonPreemptive(&ganttDiagram, 0);
+    printGannttDiagram(ganttDiagram);
     return 0;
 }

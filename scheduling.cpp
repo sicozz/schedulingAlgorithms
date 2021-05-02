@@ -151,6 +151,74 @@ void scheduleSJF::executePreemptive(std::vector<gantt*>* g, int cct) {
     if (aGantt->i!=aGantt->f) g->push_back(aGantt);
 }
 
+scheduleFCFS::scheduleFCFS(std::vector<process*> processes) {
+    this->processes = processes;
+    this->elapsed = 0;
+}
+
+bool scheduleFCFS::finished() {
+    bool ans = true;
+    std::vector<process*>::iterator it = processes.begin();
+    while(it!=processes.end() && ans) {
+        if ((*it)->remainingT!=0) ans = false;
+        it++;
+    }
+    return ans;
+}
+
+process* scheduleFCFS::fetch() {
+    process* topProc = NULL;
+    for (std::vector<process*>::iterator it = processes.begin();
+            it!=processes.end() && topProc == NULL; it++) {
+
+        if (topProc==NULL && (*it)->arrivalT<=elapsed && (*it)->remainingT!=0)
+            topProc = (*it);
+        else {
+            if ((*it)->arrivalT<=elapsed && (*it)->remainingT!=0) {
+                if ((*it)->arrivalT<topProc->arrivalT) topProc = (*it);
+            }
+        }
+
+    }
+    return topProc;
+}
+
+void scheduleFCFS::executeNonPreemptive(std::vector<gantt*>* g, int cct) {
+    process* aProc = NULL;
+    gantt* aGantt = new gantt {"X", 0, -1};
+    while(!this->finished()){
+        if (aProc==NULL) {
+            aProc = this->fetch();
+            if (aProc!=NULL) {
+                aGantt->f = elapsed;
+                if (aGantt->i!=aGantt->f) g->push_back(aGantt);
+                elapsed += cct;
+                aGantt = new gantt {aProc->pid, elapsed, -1};
+            }
+        }
+        if (aProc!=NULL) {
+            if (aProc->responseT==-1) aProc->responseT=elapsed;
+            if (aProc->remainingT!=0) aProc->remainingT--;
+            else {
+                aProc->completionT = elapsed;
+                aGantt->f = elapsed;
+                if (aGantt->i!=aGantt->f) g->push_back(aGantt);
+                elapsed += cct;
+                aGantt = new gantt {"X", elapsed, -1};
+                aProc = this->fetch();
+                if (aProc!=NULL) {
+                    aGantt->label = aProc->pid;
+                    elapsed = elapsed - 1;
+                }
+            }
+        }
+        elapsed++;
+    }
+    aProc->completionT = elapsed;
+    aGantt->f = elapsed;
+    if (aGantt->i!=aGantt->f) g->push_back(aGantt);
+}
+
 schedulePrio::schedulePrio(std::vector<process*> processes) {
     this->processes = processes;
     this->elapsed = 0;

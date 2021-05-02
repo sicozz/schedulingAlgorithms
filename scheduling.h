@@ -40,6 +40,18 @@ class scheduleSJF {
         void executePreemptive(std::vector<gantt*>* g, int cct);
 };
 
+
+class scheduleFCFS {
+    private:
+        std::vector<process*> processes;
+        int elapsed;
+        process* fetch();
+        bool finished();
+    public:
+        scheduleFCFS(std::vector<process*> processes);
+        void executeNonPreemptive(std::vector<gantt*>* g, int cct);
+};
+
 class schedulePrio {
     private:
         std::vector<process*> processes;
