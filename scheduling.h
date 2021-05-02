@@ -5,12 +5,6 @@
 #include <queue>
 #include "gantt.h"
 
-struct gantt {
-    std::string label;
-    int i;
-    int f;
-};
-
 struct process {
     std::string pid;
     int priority;

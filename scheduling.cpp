@@ -3,26 +3,26 @@
 
 int turnAroundT(process p) {
 
-    if (p.completionT == NOT_COMPLETED) {
+    if (p.completionT == -1) {
         fprintf(stderr, "Error: Turn Around Time for non completed process");
-        return NOT_COMPLETED;
+        return -1;
     }
     return p.completionT - p.arrivalT;
 }
 
 int waitT(process p) {
-    if (p.completionT == NOT_COMPLETED) {
+    if (p.completionT == -1) {
         fprintf(stderr, "Error: Wait Time for non completed process");
-        return NOT_COMPLETED;
+        return -1;
     }
     return (p.responseT - p.burstT);
 }
 
 int responseT(process p) {
 
-    if (p.responseT == NOT_COMPLETED) {
+    if (p.responseT == -1) {
         fprintf(stderr, "Error: Response Time for non completed process");
-        return NOT_COMPLETED;
+        return -1;
     }
 
     return p.responseT;

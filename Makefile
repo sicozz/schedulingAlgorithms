@@ -1,11 +1,14 @@
-#output: main.o scheduling.o
-	#g++ main.o scheduling.o -o main
+output: gantt.o scheduling.o schedsimulation.o
+	g++ gantt.o scheduling.o schedsimulation.o -o main
 
-#main.o: main.cpp
-	#g++ -c main.cpp
+gantt.o: gantt.h gantt.cpp
+	g++ -c gantt.cpp
 
-scheduling.o: scheduling.cpp scheduling.h
+scheduling.o: scheduling.h scheduling.cpp
 	g++ -c scheduling.cpp
+
+schedsimulation.o: schedsimulation.cpp
+	g++ -c schedsimulation.cpp
 
 clean:
 	rm -f *.o
