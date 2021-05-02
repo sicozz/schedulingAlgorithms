@@ -7,7 +7,8 @@
 using namespace std;
 
 
-void processSJF(scheduleSJF* s, vector<gantt*>* ganttDiagram, bool isPreemtive, int cct) {
+void processSJF(scheduleSJF* s, vector<gantt*>* ganttDiagram, bool isPreemtive,
+        int cct) {
     std::cout << "Launched by thread SJF" << std::endl;
     if (!isPreemtive)
         s->executeNonPreemptive(ganttDiagram, cct);
@@ -19,7 +20,8 @@ void processFCFS(scheduleFCFS* s, vector<gantt*>* ganttDiagram, int cct) {
     s->executeNonPreemptive(ganttDiagram, cct);
 
 }
-void processPRIO(schedulePrio* s, vector<gantt*>* ganttDiagram, bool isPreemtive, int cct) {
+void processPRIO(schedulePrio* s, vector<gantt*>* ganttDiagram, bool
+        isPreemtive, int cct) {
     std::cout << "Launched by thread PRIO"<< std::endl;
     if (!isPreemtive)
         s->executeNonPreemptive(ganttDiagram, cct);
@@ -41,7 +43,6 @@ vector<process*> parser() {
         procVec.push_back(proc);
         proc = new process;
     }
-
     return procVec;
 }
 
@@ -54,9 +55,9 @@ void copyProccess(vector<process*>* dst, vector<process*> src) {
             proc->priority = (*it)->priority;
             proc->arrivalT = (*it)->arrivalT;
             proc->burstT = (*it)->burstT;
-            proc->remainingT = proc->burstT;
-            proc->responseT = -1;
-            proc->completionT = -1;
+            proc->remainingT = (*it)->remainingT;
+            proc->responseT = (*it)->responseT;
+            proc->completionT = (*it)->completionT;
             dst->push_back(proc);
     }
 }
@@ -79,7 +80,7 @@ int main(int argc, char const *argv[]) {
     std::thread schedulings[num_threads];
 
     copyProccess(&p2, p1);
-    copyProccess(&p3, p2);
+    copyProccess(&p3, p1);
 
     scheduleSJF s(p1);
     scheduleFCFS f(p2);
@@ -96,15 +97,14 @@ int main(int argc, char const *argv[]) {
     printTitle("scheduleSJF ");
     printGannttDiagram(ganttDiagramS);
     printAverage(s.getProcesses());
-    /*
 
     printTitle("scheduleFCFS");
     printGannttDiagram(ganttDiagramF);
-    printAverage(s.getProcesses());
+    printAverage(f.getProcesses());
 
     printTitle("schedulePrio");
     printGannttDiagram(ganttDiagramP);
-    printAverage(s.getProcesses());*/
+    printAverage(p.getProcesses());
 
     return 0;
 }

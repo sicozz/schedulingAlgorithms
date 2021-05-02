@@ -119,10 +119,10 @@ process* scheduleSJF::fetch() {
     process* topProc = NULL;
     for (std::vector<process*>::iterator it = processes.begin();
             it!=processes.end(); it++) {
-        if (topProc==NULL && (*it)->arrivalT<=elapsed && (*it)->remainingT!=0)
+        if (topProc==NULL && (*it)->arrivalT<=elapsed && (*it)->completionT==-1)
             topProc = (*it);
         else {
-            if ((*it)->arrivalT<=elapsed && (*it)->remainingT!=0) {
+            if ((*it)->arrivalT<=elapsed && (*it)->completionT==-1) {
                 if ((*it)->remainingT==topProc->remainingT) {
                     if ((*it)->arrivalT<topProc->arrivalT) topProc = (*it);
                 }
@@ -183,6 +183,11 @@ void scheduleSJF::executePreemptive(std::vector<gantt*>* g, int cct) {
             }
         }
         if (aProc!=NULL) {
+            /*
+            !!!! No entra al else porque cuando tiene 1, solo lo resta
+                volviendolo 0, entonces cuando hace fetch ese ya no se toma en
+                cuenta y nunca se le asigno completionT
+                */
             if (aProc->responseT==-1) aProc->responseT=elapsed;
             if (aProc->remainingT!=0) aProc->remainingT--;
             else {
@@ -226,10 +231,11 @@ process* scheduleFCFS::fetch() {
     for (std::vector<process*>::iterator it = processes.begin();
             it!=processes.end() && topProc == NULL; it++) {
 
-        if (topProc==NULL && (*it)->arrivalT<=elapsed && (*it)->remainingT!=0)
+        if (topProc==NULL && (*it)->arrivalT<=elapsed &&
+                (*it)->completionT==-1)
             topProc = (*it);
         else {
-            if ((*it)->arrivalT<=elapsed && (*it)->remainingT!=0) {
+            if ((*it)->arrivalT<=elapsed && (*it)->completionT==-1) {
                 if ((*it)->arrivalT<topProc->arrivalT) topProc = (*it);
             }
         }
@@ -296,10 +302,11 @@ process* schedulePrio::fetch() {
     process* topProc = NULL;
     for (std::vector<process*>::iterator it = processes.begin();
             it!=processes.end(); it++) {
-        if (topProc==NULL && (*it)->arrivalT<=elapsed && (*it)->remainingT!=0)
+        if (topProc==NULL && (*it)->arrivalT<=elapsed &&
+                (*it)->completionT==-1)
             topProc = (*it);
         else {
-            if ((*it)->arrivalT<=elapsed && (*it)->remainingT!=0) {
+            if ((*it)->arrivalT<=elapsed && (*it)->completionT==-1) {
                 if ((*it)->priority==topProc->priority) {
                     if ((*it)->arrivalT<topProc->arrivalT) topProc = (*it);
                 }
