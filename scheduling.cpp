@@ -159,6 +159,7 @@ void scheduleSJF::executeNonPreemptive(std::vector<gantt*>* g, int cct) {
                 aGantt = new gantt {"X", elapsed, -1};
                 aProc = this->fetch();
                 if (aProc!=NULL) aGantt->label = aProc->pid;
+                elapsed--;
             }
         }
         elapsed++;
@@ -198,6 +199,7 @@ void scheduleSJF::executePreemptive(std::vector<gantt*>* g, int cct) {
                 aGantt = new gantt {"X", elapsed, -1};
                 aProc = this->fetch();
                 if (aProc!=NULL) aGantt->label = aProc->pid;
+                elapsed--;
             }
         }
         elapsed++;
@@ -229,7 +231,7 @@ bool scheduleFCFS::finished() {
 process* scheduleFCFS::fetch() {
     process* topProc = NULL;
     for (std::vector<process*>::iterator it = processes.begin();
-            it!=processes.end() && topProc == NULL; it++) {
+            it!=processes.end(); it++) {
 
         if (topProc==NULL && (*it)->arrivalT<=elapsed &&
                 (*it)->completionT==-1)
@@ -343,6 +345,7 @@ void schedulePrio::executeNonPreemptive(std::vector<gantt*>* g, int cct) {
                 aGantt = new gantt {"X", elapsed, -1};
                 aProc = this->fetch();
                 if (aProc!=NULL) aGantt->label = aProc->pid;
+                elapsed--;
             }
         }
         elapsed++;
@@ -377,6 +380,7 @@ void schedulePrio::executePreemptive(std::vector<gantt*>* g, int cct) {
                 aGantt = new gantt {"X", elapsed, -1};
                 aProc = this->fetch();
                 if (aProc!=NULL) aGantt->label = aProc->pid;
+                elapsed--;
             }
         }
         elapsed++;
