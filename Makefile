@@ -1,5 +1,5 @@
 output: gantt.o scheduling.o schedsimulation.o
-	g++ gantt.o scheduling.o schedsimulation.o -o main
+	g++ gantt.o scheduling.o schedsimulation.o  -pthread -o main
 
 gantt.o: gantt.h gantt.cpp
 	g++ -c gantt.cpp

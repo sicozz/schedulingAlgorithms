@@ -1,6 +1,54 @@
 #include <iostream>
 #include "scheduling.h"
 
+using namespace std;
+
+void printAverage(std::vector<process*> procVec) {
+
+    int turnAroundT, waitT, responseT;
+    turnAroundT = avgTurnAroundT(procVec);
+    waitT = avgWaitT(procVec);
+    responseT = avgResponseT(procVec);
+
+    cout << ANSI_COLOR_CYAN << "\t\t+----------------------------------+" << endl;
+    cout << "\t\t|" << ANSI_COLOR_RESET;
+    cout << ANSI_COLOR_MAGENTA << "             AVERAGE              " << ANSI_COLOR_RESET;
+    cout << ANSI_COLOR_CYAN << "|" << endl;
+    cout << "\t\t+----------------------------------+" << ANSI_COLOR_RESET;
+    cout << ANSI_COLOR_GREEN << setw( 62 ) <<
+    setfill( '-' ) << '\n' << setfill( ' ' ) << ANSI_COLOR_RESET << endl;
+
+    cout << ANSI_COLOR_GREEN << "| " << ANSI_COLOR_RESET
+    << left <<  ANSI_COLOR_BLUE << setw( 18 )
+    << "Turnaround Time" << ANSI_COLOR_RESET;
+
+    cout << ANSI_COLOR_GREEN << "| " << ANSI_COLOR_RESET
+    << left <<  ANSI_COLOR_BLUE << setw( 18 )
+    << "Waiting Time" << ANSI_COLOR_RESET;
+
+    cout << ANSI_COLOR_GREEN << "| " << ANSI_COLOR_RESET
+    << left <<  ANSI_COLOR_BLUE << setw( 18 )
+    << "Response Time" << ANSI_COLOR_RESET;
+
+
+    cout << ANSI_COLOR_GREEN << "|"<< setw( 62 ) <<
+    setfill( '-' ) << '\n' << setfill( ' ' ) << ANSI_COLOR_RESET << endl;
+    cout << ANSI_COLOR_GREEN << "| " << ANSI_COLOR_RESET
+    << left <<  ANSI_COLOR_BLUE << setw( 18 )
+    << turnAroundT << ANSI_COLOR_RESET;
+
+    cout << ANSI_COLOR_GREEN << "| " << ANSI_COLOR_RESET
+    << left <<  ANSI_COLOR_BLUE << setw( 18 )
+    << waitT << ANSI_COLOR_RESET;
+
+    cout << ANSI_COLOR_GREEN << "| " << ANSI_COLOR_RESET
+    << left <<  ANSI_COLOR_BLUE << setw( 18 )
+    << responseT << ANSI_COLOR_RESET;
+    cout << ANSI_COLOR_GREEN << "|"<< setw( 62 ) <<
+    setfill( '-' ) << '\n' << setfill( ' ' ) << ANSI_COLOR_RESET << endl << endl;
+}
+
+
 int turnAroundT(process p) {
 
     if (p.completionT == -1) {
@@ -15,7 +63,7 @@ int waitT(process p) {
         fprintf(stderr, "Error: Wait Time for non completed process");
         return -1;
     }
-    return (p.responseT - p.burstT);
+    return (turnAroundT(p) - p.burstT);
 }
 
 int responseT(process p) {
@@ -31,7 +79,7 @@ int responseT(process p) {
 int avgWaitT(std::vector<process*> procVec) {
     int total = 0;
     for (std::vector<process*>::iterator it = procVec.begin();
-            it!=procVec.end(); it++) total += waitT(*(*it));
+            it!=procVec.end(); it++)  total += waitT(*(*it));
     return (total/procVec.size());
 }
 
@@ -54,6 +102,9 @@ scheduleSJF::scheduleSJF(std::vector<process*> processes) {
     this->elapsed = 0;
 }
 
+std::vector<process*> scheduleSJF::getProcesses() {
+    return processes;
+}
 bool scheduleSJF::finished() {
     bool ans = true;
     std::vector<process*>::iterator it = processes.begin();
@@ -156,6 +207,10 @@ scheduleFCFS::scheduleFCFS(std::vector<process*> processes) {
     this->elapsed = 0;
 }
 
+std::vector<process*> scheduleFCFS::getProcesses() {
+    return processes;
+}
+
 bool scheduleFCFS::finished() {
     bool ans = true;
     std::vector<process*>::iterator it = processes.begin();
@@ -224,6 +279,9 @@ schedulePrio::schedulePrio(std::vector<process*> processes) {
     this->elapsed = 0;
 }
 
+std::vector<process*> schedulePrio::getProcesses() {
+    return processes;
+}
 bool schedulePrio::finished() {
     bool ans = true;
     std::vector<process*>::iterator it = processes.begin();
@@ -320,4 +378,3 @@ void schedulePrio::executePreemptive(std::vector<gantt*>* g, int cct) {
     aGantt->f = elapsed;
     if (aGantt->i!=aGantt->f) g->push_back(aGantt);
 }
-

@@ -13,12 +13,21 @@ string formatString(string s, int max) {
 
     return output;
 }
-void printGannttDiagram(vector<gantt*> ganttDiagram) {
 
+void printTitle(string str) {
+
+    cout << endl;
+    cout << ANSI_COLOR_CYAN << "\t+-----------------------------------------+" << endl;
+    cout << "\t|" << ANSI_COLOR_RESET;
+    cout << ANSI_COLOR_YELLOW  << "               "  <<  str << "              " << ANSI_COLOR_RESET;
+    cout << ANSI_COLOR_CYAN << "|" << endl;
+
+}
+
+void printGannttDiagram(vector<gantt*> ganttDiagram) {
 
     int size = ganttDiagram.size(), first = 1, startp, endp;
 
-    cout << endl;
     cout << ANSI_COLOR_CYAN << "\t+-----------------------------------------+" << endl;
     cout << "\t|" << ANSI_COLOR_RESET;
     cout << ANSI_COLOR_MAGENTA << "             GANTT  DIAGRAM              " << ANSI_COLOR_RESET;
@@ -26,7 +35,7 @@ void printGannttDiagram(vector<gantt*> ganttDiagram) {
     cout << "\t+-----------------------------------------+" << ANSI_COLOR_RESET << endl;
 
     cout << ANSI_COLOR_GREEN << setw( 12 + ( (size-1) * 10) ) <<
-    setfill( '-' ) << '\n' << setfill( ' ' ) << ANSI_COLOR_RESET;
+    setfill( '-' ) << '\n' << setfill( ' ' ) << ANSI_COLOR_RESET << endl;
 
     for (auto it = ganttDiagram.begin(); it!=ganttDiagram.end(); it++)
         cout << ANSI_COLOR_GREEN << "| " << ANSI_COLOR_RESET

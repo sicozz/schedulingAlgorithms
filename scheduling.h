@@ -3,8 +3,9 @@
 #include <vector>
 #include <map>
 #include <queue>
+#include <iomanip>
 #include "gantt.h"
-
+#include <stdio.h>
 struct process {
     std::string pid;
     int priority;
@@ -15,6 +16,8 @@ struct process {
     int completionT;
 };
 
+void printTitle(std::string str);
+void printAverage(std::vector<process*> procVec);
 int turnAroundT(process p);
 int waitT(process p);
 int responseT(process p);
@@ -29,6 +32,7 @@ class scheduleSJF {
         process* fetch();
         bool finished();
     public:
+        std::vector<process*> getProcesses();
         scheduleSJF(std::vector<process*> processes);
         void executeNonPreemptive(std::vector<gantt*>* g, int cct);
         void executePreemptive(std::vector<gantt*>* g, int cct);
@@ -42,6 +46,7 @@ class scheduleFCFS {
         process* fetch();
         bool finished();
     public:
+        std::vector<process*> getProcesses();
         scheduleFCFS(std::vector<process*> processes);
         void executeNonPreemptive(std::vector<gantt*>* g, int cct);
 };
@@ -53,6 +58,7 @@ class schedulePrio {
         process* fetch();
         bool finished();
     public:
+        std::vector<process*> getProcesses();
         schedulePrio(std::vector<process*> processes);
         void executeNonPreemptive(std::vector<gantt*>* g, int cct);
         void executePreemptive(std::vector<gantt*>* g, int cct);
