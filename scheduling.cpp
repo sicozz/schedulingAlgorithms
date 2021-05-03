@@ -14,37 +14,37 @@ void printAverage(std::vector<process*> procVec) {
     cout << "\t\t|" << ANSI_COLOR_RESET;
     cout << ANSI_COLOR_MAGENTA << "             AVERAGE              " << ANSI_COLOR_RESET;
     cout << ANSI_COLOR_CYAN << "|" << endl;
-    cout << "\t\t+----------------------------------+" << ANSI_COLOR_RESET;
-    cout << ANSI_COLOR_GREEN << setw( 62 ) <<
-    setfill( '-' ) << '\n' << setfill( ' ' ) << ANSI_COLOR_RESET << endl;
+    cout << "\t\t+----------------------------------+" << ANSI_COLOR_RESET << endl;
+    cout << ANSI_COLOR_CYAN << setw( 62 ) <<
+    setfill( '-' ) << '\n' << setfill( ' ' ) << endl;
 
-    cout << ANSI_COLOR_GREEN << "| " << ANSI_COLOR_RESET
-    << left <<  ANSI_COLOR_BLUE << setw( 18 )
+    cout << "| " << ANSI_COLOR_RESET
+    << left <<  ANSI_COLOR_YELLOW << setw( 18 )
     << "Turnaround Time" << ANSI_COLOR_RESET;
 
-    cout << ANSI_COLOR_GREEN << "| " << ANSI_COLOR_RESET
-    << left <<  ANSI_COLOR_BLUE << setw( 18 )
+    cout << ANSI_COLOR_CYAN << "| " << ANSI_COLOR_RESET
+    << left <<  ANSI_COLOR_YELLOW << setw( 18 )
     << "Waiting Time" << ANSI_COLOR_RESET;
 
-    cout << ANSI_COLOR_GREEN << "| " << ANSI_COLOR_RESET
-    << left <<  ANSI_COLOR_BLUE << setw( 18 )
+    cout << ANSI_COLOR_CYAN << "| " << ANSI_COLOR_RESET
+    << left << ANSI_COLOR_YELLOW << setw( 18 )
     << "Response Time" << ANSI_COLOR_RESET;
 
 
-    cout << ANSI_COLOR_GREEN << "|"<< setw( 62 ) <<
+    cout << ANSI_COLOR_CYAN << "|"<< setw( 62 ) <<
     setfill( '-' ) << '\n' << setfill( ' ' ) << ANSI_COLOR_RESET << endl;
-    cout << ANSI_COLOR_GREEN << "| " << ANSI_COLOR_RESET
+    cout << ANSI_COLOR_CYAN << "| " << ANSI_COLOR_RESET
     << left <<  ANSI_COLOR_BLUE << setw( 18 )
     << turnAroundT << ANSI_COLOR_RESET;
 
-    cout << ANSI_COLOR_GREEN << "| " << ANSI_COLOR_RESET
+    cout << ANSI_COLOR_CYAN << "| " << ANSI_COLOR_RESET
     << left <<  ANSI_COLOR_BLUE << setw( 18 )
     << waitT << ANSI_COLOR_RESET;
 
-    cout << ANSI_COLOR_GREEN << "| " << ANSI_COLOR_RESET
+    cout << ANSI_COLOR_CYAN << "| " << ANSI_COLOR_RESET
     << left <<  ANSI_COLOR_BLUE << setw( 18 )
     << responseT << ANSI_COLOR_RESET;
-    cout << ANSI_COLOR_GREEN << "|"<< setw( 62 ) <<
+    cout << ANSI_COLOR_CYAN<< "|"<< setw( 62 ) <<
     setfill( '-' ) << '\n' << setfill( ' ' ) << ANSI_COLOR_RESET << endl << endl;
 }
 

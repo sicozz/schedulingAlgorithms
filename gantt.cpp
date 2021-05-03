@@ -34,21 +34,10 @@ void printGannttDiagram(vector<gantt*> ganttDiagram) {
     cout << ANSI_COLOR_CYAN << "|" << endl;
     cout << "\t+-----------------------------------------+" << ANSI_COLOR_RESET << endl;
 
-    cout << ANSI_COLOR_GREEN << setw( 12 + ( (size-1) * 10) ) <<
-    setfill( '-' ) << '\n' << setfill( ' ' ) << ANSI_COLOR_RESET << endl;
-
+    cout << "\tLABEL\t\tSTART\t\tEND" << endl;
     for (auto it = ganttDiagram.begin(); it!=ganttDiagram.end(); it++)
-        cout << ANSI_COLOR_GREEN << "| " << ANSI_COLOR_RESET
-        << left <<  ANSI_COLOR_BLUE << setw( 8 )
-        << formatString((*it)->label, 6) << ANSI_COLOR_RESET;
-
-    cout << ANSI_COLOR_GREEN << "|" << setw( 12 + ( (size-1) * 10)  ) <<
-    setfill( '-' ) << '\n' << setfill( ' ' ) << ANSI_COLOR_RESET << endl;
-
-    for (auto it = ganttDiagram.begin(); it!=ganttDiagram.end(); it++) {
-        if (first-- > 0)
-            cout << left << ANSI_COLOR_YELLOW  << setw( 10 ) << (*it)->i;
-        cout << setw( 10 ) << (*it)->f;
-    }
-    cout << ANSI_COLOR_RESET << endl << endl;
+        cout << "\t" <<  ANSI_COLOR_GREEN  << formatString((*it)->label, 6) <<  "\t\t" <<  ANSI_COLOR_YELLOW
+         << formatString( to_string((*it)->i), 5) << ANSI_COLOR_RED
+         << "\t\t" << formatString( to_string((*it)->f), 5) <<  ANSI_COLOR_RESET << endl;
+    cout << endl;
 }
