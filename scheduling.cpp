@@ -389,3 +389,99 @@ void schedulePrio::executePreemptive(std::vector<gantt*>* g, int cct) {
     aGantt->f = elapsed;
     if (aGantt->i!=aGantt->f) g->push_back(aGantt);
 }
+
+/* Proyecto */
+
+
+scheduleRR::scheduleRR(std::vector<process*> processes, int quantum)
+{
+    this->processes = processes;
+    this->elapsed = 0;
+    this->quantum = quantum;
+    this->readyQ = *(new std::queue<process*>);
+}
+
+std::vector<process*>
+scheduleRR::getProcesses()
+{
+    return processes;
+}
+
+bool
+scheduleRR::finished()
+{
+    bool ans = true;
+    std::vector<process*>::iterator it = processes.begin();
+    while(it!=processes.end() && ans) {
+        if ((*it)->remainingT!=0) ans = false;
+        it++;
+    }
+    return ans;
+}
+
+void
+scheduleRR::workOn(process* p)
+{
+    if (p->responseT == -1)
+        p->responseT = elapsed;
+    if (p->remainingT > 0)
+        p->remainingT--;
+    if (p->remainingT == 0)
+        p->completionT = elapsed + 1;
+}
+
+void
+scheduleRR::updateReadyQ()
+{
+    std::vector<process*>::iterator it;
+    for (it = processes.begin(); it != processes.end(); it++) {
+        if ((*it)->arrivalT == this->elapsed)
+            this->readyQ.push(*it);
+    }
+}
+
+void
+scheduleRR::executePreemptive(std::vector<gantt*>* g, int cct)
+{
+    gantt* aGantt;
+    process* aProc;
+    int aQuantum;
+
+    aGantt = new gantt {"X", 0, -1};
+    aProc = NULL;
+    aQuantum = quantum;
+
+    while (!finished()) {
+        updateReadyQ();
+        if (aProc == NULL || aQuantum == 0) {
+            if (aProc != NULL) {
+                readyQ.push(aProc);
+                elapsed += cct;
+            }
+
+            aProc = readyQ.front();
+            readyQ.pop();
+
+            if (aProc != NULL) {
+                aGantt->f = elapsed;
+                if (aGantt->i!=aGantt->f)
+                    g->push_back(aGantt);
+
+                aGantt = new gantt {aProc->pid, elapsed, -1};
+            }
+            aQuantum = quantum;     // Se restablece el quantum
+        }
+
+        if (aProc != NULL) {
+            workOn(aProc);
+            if (aProc->completionT != -1) {
+                aProc = NULL;
+                aGantt->f = elapsed + 1;
+                g->push_back(aGantt);
+                aGantt = new gantt {"X", elapsed + 1, -1};
+            }
+        }
+        elapsed++;
+        aQuantum--;
+    }
+}

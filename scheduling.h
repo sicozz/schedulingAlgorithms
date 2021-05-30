@@ -32,8 +32,8 @@ class scheduleSJF {
         process* fetch();
         bool finished();
     public:
-        std::vector<process*> getProcesses();
         scheduleSJF(std::vector<process*> processes);
+        std::vector<process*> getProcesses();
         void executeNonPreemptive(std::vector<gantt*>* g, int cct);
         void executePreemptive(std::vector<gantt*>* g, int cct);
 };
@@ -46,8 +46,8 @@ class scheduleFCFS {
         process* fetch();
         bool finished();
     public:
-        std::vector<process*> getProcesses();
         scheduleFCFS(std::vector<process*> processes);
+        std::vector<process*> getProcesses();
         void executeNonPreemptive(std::vector<gantt*>* g, int cct);
 };
 
@@ -58,9 +58,24 @@ class schedulePrio {
         process* fetch();
         bool finished();
     public:
-        std::vector<process*> getProcesses();
         schedulePrio(std::vector<process*> processes);
+        std::vector<process*> getProcesses();
         void executeNonPreemptive(std::vector<gantt*>* g, int cct);
+        void executePreemptive(std::vector<gantt*>* g, int cct);
+};
+
+class scheduleRR {
+    private:
+        std::vector<process*> processes;
+        int elapsed;
+        int quantum;
+        std::queue<process*> readyQ;
+        bool finished();
+        void workOn(process*);
+        void updateReadyQ();
+    public:
+        scheduleRR(std::vector<process*> processes, int quantum);
+        std::vector<process*> getProcesses();
         void executePreemptive(std::vector<gantt*>* g, int cct);
 };
 #endif
