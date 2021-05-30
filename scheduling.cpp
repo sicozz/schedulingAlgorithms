@@ -48,6 +48,10 @@ void printAverage(std::vector<process*> procVec) {
     setfill( '-' ) << '\n' << setfill( ' ' ) << ANSI_COLOR_RESET << endl << endl;
 }
 
+bool processCompare::operator ()(const process* pa, const process* pb)
+{
+    return pa->priority > pb->priority;
+}
 
 int turnAroundT(process p) {
 
@@ -463,6 +467,104 @@ scheduleRR::executePreemptive(std::vector<gantt*>* g, int cct)
             readyQ.pop();
 
             if (aProc != NULL) {
+                aGantt->f = elapsed;
+                if (aGantt->i!=aGantt->f)
+                    g->push_back(aGantt);
+
+                aGantt = new gantt {aProc->pid, elapsed, -1};
+            }
+            aQuantum = quantum;     // Se restablece el quantum
+        }
+
+        if (aProc != NULL) {
+            workOn(aProc);
+            if (aProc->completionT != -1) {
+                aProc = NULL;
+                aGantt->f = elapsed + 1;
+                g->push_back(aGantt);
+                aGantt = new gantt {"X", elapsed + 1, -1};
+            }
+        }
+        elapsed++;
+        aQuantum--;
+    }
+}
+
+/* Priority Round Robin */
+
+schedulePrioRR::schedulePrioRR(std::vector<process*> processes, int quantum)
+{
+    this->processes = processes;
+    this->elapsed = 0;
+    this->quantum = quantum;
+    this->readyQ = *(new std::priority_queue<process*, std::vector<process*>,
+            processCompare>);
+}
+
+std::vector<process*>
+schedulePrioRR::getProcesses()
+{
+    return processes;
+}
+
+bool
+schedulePrioRR::finished()
+{
+    bool ans = true;
+    std::vector<process*>::iterator it = processes.begin();
+    while(it!=processes.end() && ans) {
+        if ((*it)->remainingT!=0) ans = false;
+        it++;
+    }
+    return ans;
+}
+
+void
+schedulePrioRR::workOn(process* p)
+{
+    if (p->responseT == -1)
+        p->responseT = elapsed;
+    if (p->remainingT > 0)
+        p->remainingT--;
+    if (p->remainingT == 0)
+        p->completionT = elapsed + 1;
+}
+
+void
+schedulePrioRR::updateReadyQ()
+{
+    std::vector<process*>::iterator it;
+    for (it = processes.begin(); it != processes.end(); it++) {
+        if ((*it)->arrivalT == this->elapsed)
+            this->readyQ.push(*it);
+    }
+}
+
+void
+schedulePrioRR::executePreemptive(std::vector<gantt*>* g, int cct)
+{
+    gantt* aGantt;
+    process* aProc;
+    int aQuantum;
+
+    aGantt = new gantt {"X", 0, -1};
+    aProc = NULL;
+    aQuantum = quantum;
+
+    while (!finished()) {
+        updateReadyQ();
+        if (aProc == NULL || aQuantum == 0) {
+            if (aProc != NULL) {
+                if (aProc != readyQ.top()) {
+                    elapsed += cct;
+                }
+                readyQ.push(aProc);
+            }
+
+            aProc = readyQ.top();
+            readyQ.pop();
+
+            if (aProc != NULL && aGantt->label != aProc->pid) {
                 aGantt->f = elapsed;
                 if (aGantt->i!=aGantt->f)
                     g->push_back(aGantt);

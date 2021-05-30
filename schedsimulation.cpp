@@ -34,6 +34,11 @@ void processRR(scheduleRR* s, vector<gantt*>* ganttDiagram, int cct) {
     s->executePreemptive(ganttDiagram, cct);
 }
 
+void processPrioRR(schedulePrioRR* s, vector<gantt*>* ganttDiagram, int cct) {
+    std::cout << "Launched by thread PrioRR"<< std::endl;
+    s->executePreemptive(ganttDiagram, cct);
+}
+
 
 vector<process*> parser() {
     int nP;
@@ -81,24 +86,28 @@ int main(int argc, char const *argv[]) {
     int quantum;
     quantum = argc > 3 ? atoi(argv[3]) : 3;
 
-    vector<process*> p1 = parser(), p2, p3, p4;
-    vector<gantt*> ganttDiagramS, ganttDiagramF, ganttDiagramP, ganttDiagramRR;
-    const int num_threads = 4;
+    vector<process*> p1 = parser(), p2, p3, p4, p5;
+    vector<gantt*> ganttDiagramS, ganttDiagramF, ganttDiagramP, ganttDiagramRR,
+        ganttDiagramPrioRR;
+    const int num_threads = 5;
     std::thread schedulings[num_threads];
 
     copyProccess(&p2, p1);
     copyProccess(&p3, p1);
     copyProccess(&p4, p1);
+    copyProccess(&p5, p1);
 
     scheduleSJF s(p1);
     scheduleFCFS f(p2);
     schedulePrio p(p3);
     scheduleRR rr(p4, quantum);
+    schedulePrioRR prr(p5, quantum);
 
     schedulings[0] = std::thread(processSJF,  &s, &ganttDiagramS, isPreemtive, cct); // scheduleSJF
     schedulings[1] = std::thread(processFCFS, &f, &ganttDiagramF, cct); // scheduleFCFS
     schedulings[2] = std::thread(processPRIO, &p, &ganttDiagramP, isPreemtive, cct); // schedulePrio
-    schedulings[3] = std::thread(processRR, &rr, &ganttDiagramRR, cct); // schedulePrio
+    schedulings[3] = std::thread(processRR, &rr, &ganttDiagramRR, cct); // scheduleRR
+    schedulings[4] = std::thread(processPrioRR, &prr, &ganttDiagramPrioRR, cct); // schedulePrioRR
 
     //Join the threads with the main thread
     for (int i = 0; i < num_threads; ++i)
@@ -120,5 +129,8 @@ int main(int argc, char const *argv[]) {
     printGannttDiagram(ganttDiagramRR);
     printAverage(rr.getProcesses());
 
+    printTitle("schedulePrioRR");
+    printGannttDiagram(ganttDiagramPrioRR);
+    printAverage(prr.getProcesses());
     return 0;
 }

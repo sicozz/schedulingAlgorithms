@@ -16,6 +16,11 @@ struct process {
     int completionT;
 };
 
+class processCompare {
+    public:
+        bool operator ()(const process* pa, const process* pb);
+};
+
 void printTitle(std::string str);
 void printAverage(std::vector<process*> procVec);
 int turnAroundT(process p);
@@ -75,6 +80,22 @@ class scheduleRR {
         void updateReadyQ();
     public:
         scheduleRR(std::vector<process*> processes, int quantum);
+        std::vector<process*> getProcesses();
+        void executePreemptive(std::vector<gantt*>* g, int cct);
+};
+
+class schedulePrioRR {
+    private:
+        std::vector<process*> processes;
+        int elapsed;
+        int quantum;
+        std::priority_queue<process*, std::vector<process*>, processCompare>
+            readyQ;
+        bool finished();
+        void workOn(process*);
+        void updateReadyQ();
+    public:
+        schedulePrioRR(std::vector<process*> processes, int quantum);
         std::vector<process*> getProcesses();
         void executePreemptive(std::vector<gantt*>* g, int cct);
 };
