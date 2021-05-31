@@ -5,7 +5,7 @@ using namespace std;
 
 void printAverage(std::vector<process*> procVec) {
 
-    int turnAroundT, waitT, responseT;
+    float turnAroundT, waitT, responseT;
     turnAroundT = avgTurnAroundT(procVec);
     waitT = avgWaitT(procVec);
     responseT = avgResponseT(procVec);
@@ -80,25 +80,28 @@ int responseT(process p) {
     return p.responseT;
 }
 
-int avgWaitT(std::vector<process*> procVec) {
-    int total = 0;
+float
+avgWaitT(std::vector<process*> procVec) {
+    float total = 0;
     for (std::vector<process*>::iterator it = procVec.begin();
-            it!=procVec.end(); it++)  total += waitT(*(*it));
-    return (total/procVec.size());
+            it!=procVec.end(); it++)  total += float(waitT(*(*it)));
+    return (total/float(procVec.size()));
 }
 
-int avgTurnAroundT(std::vector<process*> procVec) {
-    int total = 0;
+float
+avgTurnAroundT(std::vector<process*> procVec) {
+    float total = 0;
     for (std::vector<process*>::iterator it = procVec.begin();
-            it!=procVec.end(); it++) total += turnAroundT(*(*it));
-    return (total/procVec.size());
+            it!=procVec.end(); it++) total += float(turnAroundT(*(*it)));
+    return (total/float(procVec.size()));
 }
 
-int avgResponseT(std::vector<process*> procVec) {
-    int total = 0;
+float
+avgResponseT(std::vector<process*> procVec) {
+    float total = 0;
     for (std::vector<process*>::iterator it = procVec.begin();
-            it!=procVec.end(); it++) total += responseT(*(*it));
-    return (total/procVec.size());
+            it!=procVec.end(); it++) total += float(responseT(*(*it)));
+    return (total/float(procVec.size()));
 }
 
 scheduleSJF::scheduleSJF(std::vector<process*> processes) {

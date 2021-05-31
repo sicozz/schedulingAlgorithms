@@ -26,9 +26,9 @@ void printAverage(std::vector<process*> procVec);
 int turnAroundT(process p);
 int waitT(process p);
 int responseT(process p);
-int avgWaitT(std::vector<process*> procVec);
-int avgTurnAroundT(std::vector<process*> procVec);
-int avgResponseT(std::vector<process*> procVec);
+float avgWaitT(std::vector<process*> procVec);
+float avgTurnAroundT(std::vector<process*> procVec);
+float avgResponseT(std::vector<process*> procVec);
 
 class scheduleSJF {
     private:
