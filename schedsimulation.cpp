@@ -1,11 +1,20 @@
+#include <ctype.h>
 #include <iostream>
-#include <thread>
-#include "scheduling.h"
 #include "gantt.h"
+#include "scheduling.h"
+#include <string.h>
 #include "stdio.h"
+#include <stdlib.h>
+#include <unistd.h>
+#include <thread>
+
+#define FCFS    0
+#define SJF     1
+#define PRIO    2
+#define RR      3
+#define PRIO_RR 4
 
 using namespace std;
-
 
 void processSJF(scheduleSJF* s, vector<gantt*>* ganttDiagram, bool isPreemtive,
         int cct) {
@@ -72,19 +81,104 @@ void copyProccess(vector<process*>* dst, vector<process*> src) {
     }
 }
 
+void
+usage(const char progName[])
+{
+    cout << "usage: " << progName << " [SCHEDULINGS] [OPTIONS]" << endl;
+    cout << "SCHEDULINGS:" << endl << 
+        "\t-f\t\t\t\tFirst come first serve" << endl <<
+        "\t-s pre|nopre\t\t\tShortest job first" << endl <<
+        "\t-p pre|nopre\t\t\tPriority" << endl <<
+        "\t-r\t\t\t\tRound Robin" << endl <<
+        "\t-R\t\t\t\tPriority Round Robin" << endl;
+    cout << "OPTIONS:" << endl << 
+        "\t-c [n > 0]\t\t\tContext change time" << endl <<
+        "\t-q [n > 0]\t\t\tTime quantum" << endl <<
+        "\t-o file\t\t\t\tOutput file" << endl;
+}
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char *argv[]) {
 
     // ./main isPreemtive cct
-    if (argc < 3) {
-        std::cout << "Error!" << '\n';
+    if (argc < 2) {
+        usage(argv[0]);
         exit(EXIT_FAILURE);
     }
 
-    bool isPreemtive = atoi(argv[1]);
-    int cct = atoi(argv[2]);
-    int quantum;
-    quantum = argc > 3 ? atoi(argv[3]) : 3;
+    bool schedules[] = {
+        false,          // First come first serve
+        false,          // Shortest job first
+        false,          // Priority
+        false,          // Round Robin
+        false           // Priority round Robin
+    };
+    bool sjf_pre, prio_pre;
+    char *output_file;
+    int argIndex, cct = 0, flag, quantum = 2;
+
+    while ((flag = getopt(argc, argv, "fs:p:rRq:c:o:")) != -1) {
+        switch (flag) {
+            case 'f':
+                schedules[FCFS] = true;
+                break;
+            case 's':
+                schedules[SJF] = true;
+                if (strcmp(optarg, "pre") == 0)
+                    sjf_pre = true;
+                else if (strcmp(optarg, "nopre") == 0)
+                    sjf_pre = false;
+                else {
+                    fprintf(stderr,
+                            "Option -%c requires preemptive argument.\n",
+                            optopt);
+                    usage(argv[0]);
+                    return 1;
+                }
+                break;
+            case 'p':
+                schedules[PRIO] = true;
+                if (strcmp(optarg, "pre") == 0)
+                    prio_pre = true;
+                else if (strcmp(optarg, "nopre") == 0)
+                    prio_pre = false;
+                else {
+                    fprintf(stderr,
+                            "Option -%c requires preemptive argument.\n",
+                            optopt);
+                    usage(argv[0]);
+                    return 1;
+                }
+                break;
+            case 'r':
+                schedules[RR] = true;
+                break;
+            case 'R':
+                schedules[PRIO_RR] = true;
+                break;
+            case 'c':
+                cct = atoi(optarg);
+                break;
+            case 'q':
+                quantum = atoi(optarg);
+                break;
+            case 'o':
+                output_file = optarg;
+                break;
+            case '?':
+                if (optopt == 'c')
+                    fprintf (stderr, "Option -%c requires an argument.\n",
+                            optopt);
+                else if (isprint (optopt))
+                    fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+                else
+                    fprintf (stderr, "Unknown option character `\\x%x'.\n",
+                            optopt);
+                return 1;
+            default:
+                abort ();
+        }
+    }
+    return 0;
 
     vector<process*> p1 = parser(), p2, p3, p4, p5;
     vector<gantt*> ganttDiagramS, ganttDiagramF, ganttDiagramP, ganttDiagramRR,
@@ -103,9 +197,9 @@ int main(int argc, char const *argv[]) {
     scheduleRR rr(p4, quantum);
     schedulePrioRR prr(p5, quantum);
 
-    schedulings[0] = std::thread(processSJF,  &s, &ganttDiagramS, isPreemtive, cct); // scheduleSJF
+    schedulings[0] = std::thread(processSJF,  &s, &ganttDiagramS, sjf_pre, cct); // scheduleSJF
     schedulings[1] = std::thread(processFCFS, &f, &ganttDiagramF, cct); // scheduleFCFS
-    schedulings[2] = std::thread(processPRIO, &p, &ganttDiagramP, isPreemtive, cct); // schedulePrio
+    schedulings[2] = std::thread(processPRIO, &p, &ganttDiagramP, prio_pre, cct); // schedulePrio
     schedulings[3] = std::thread(processRR, &rr, &ganttDiagramRR, cct); // scheduleRR
     schedulings[4] = std::thread(processPrioRR, &prr, &ganttDiagramPrioRR, cct); // schedulePrioRR
 
