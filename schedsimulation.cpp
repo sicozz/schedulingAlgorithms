@@ -1,51 +1,60 @@
-#include <ctype.h>
 #include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <thread>
+#include <unistd.h>
+
 #include "gantt.h"
 #include "scheduling.h"
-#include <string.h>
-#include "stdio.h"
-#include <stdlib.h>
-#include <unistd.h>
-#include <thread>
 
 #define FCFS    0
 #define SJF     1
 #define PRIO    2
 #define RR      3
 #define PRIO_RR 4
+#define NSCHDS  5
 
 using namespace std;
 
-void processSJF(scheduleSJF* s, vector<gantt*>* ganttDiagram, bool isPreemtive,
-        int cct) {
+struct sch_answer {
+    vector<process*> initial_processes;
+    vector<gantt*> ganttDiagram;
+    vector<process*> final_processes;
+};
+
+void processSJF(scheduleSJF* s, sch_answer* sch , bool isPreemtive, int cct) {
     std::cout << "Launched by thread SJF" << std::endl;
     if (!isPreemtive)
-        s->executeNonPreemptive(ganttDiagram, cct);
+        s->executeNonPreemptive(&(sch->ganttDiagram), cct);
     else
-        s->executePreemptive(ganttDiagram, cct);
+        s->executePreemptive(&(sch->ganttDiagram), cct);
+    sch->final_processes = s->getProcesses();
 }
-void processFCFS(scheduleFCFS* s, vector<gantt*>* ganttDiagram, int cct) {
+void processFCFS(scheduleFCFS* s, sch_answer* sch, int cct) {
     std::cout << "Launched by thread FCFS" << std::endl;
-    s->executeNonPreemptive(ganttDiagram, cct);
-
+    s->executeNonPreemptive(&(sch->ganttDiagram), cct);
+    sch->final_processes = s->getProcesses();
 }
-void processPRIO(schedulePrio* s, vector<gantt*>* ganttDiagram, bool
-        isPreemtive, int cct) {
+void processPRIO(schedulePrio* s, sch_answer* sch, bool isPreemtive, int cct) {
     std::cout << "Launched by thread PRIO"<< std::endl;
     if (!isPreemtive)
-        s->executeNonPreemptive(ganttDiagram, cct);
+        s->executeNonPreemptive(&(sch->ganttDiagram), cct);
     else
-        s->executePreemptive(ganttDiagram, cct);
+        s->executePreemptive(&(sch->ganttDiagram), cct);
+    sch->final_processes = s->getProcesses();
 }
 
-void processRR(scheduleRR* s, vector<gantt*>* ganttDiagram, int cct) {
+void processRR(scheduleRR* s, sch_answer* sch, int cct) {
     std::cout << "Launched by thread RR"<< std::endl;
-    s->executePreemptive(ganttDiagram, cct);
+    s->executePreemptive(&(sch->ganttDiagram), cct);
+    sch->final_processes = s->getProcesses();
 }
 
-void processPrioRR(schedulePrioRR* s, vector<gantt*>* ganttDiagram, int cct) {
+void processPrioRR(schedulePrioRR* s, sch_answer* sch, int cct) {
     std::cout << "Launched by thread PrioRR"<< std::endl;
-    s->executePreemptive(ganttDiagram, cct);
+    s->executePreemptive(&(sch->ganttDiagram), cct);
+    sch->final_processes = s->getProcesses();
 }
 
 
@@ -99,7 +108,6 @@ usage(const char progName[])
 
 int main(int argc, char *argv[]) {
 
-    // ./main isPreemtive cct
     if (argc < 2) {
         usage(argv[0]);
         exit(EXIT_FAILURE);
@@ -114,15 +122,17 @@ int main(int argc, char *argv[]) {
     };
     bool sjf_pre, prio_pre;
     char *output_file;
-    int argIndex, cct = 0, flag, quantum = 2;
+    int argIndex, cct = 0, flag, num_sch = 0, quantum = 2;
 
     while ((flag = getopt(argc, argv, "fs:p:rRq:c:o:")) != -1) {
         switch (flag) {
             case 'f':
                 schedules[FCFS] = true;
+                num_sch++;
                 break;
             case 's':
                 schedules[SJF] = true;
+                num_sch++;
                 if (strcmp(optarg, "pre") == 0)
                     sjf_pre = true;
                 else if (strcmp(optarg, "nopre") == 0)
@@ -137,6 +147,7 @@ int main(int argc, char *argv[]) {
                 break;
             case 'p':
                 schedules[PRIO] = true;
+                num_sch++;
                 if (strcmp(optarg, "pre") == 0)
                     prio_pre = true;
                 else if (strcmp(optarg, "nopre") == 0)
@@ -151,9 +162,11 @@ int main(int argc, char *argv[]) {
                 break;
             case 'r':
                 schedules[RR] = true;
+                num_sch++;
                 break;
             case 'R':
                 schedules[PRIO_RR] = true;
+                num_sch++;
                 break;
             case 'c':
                 cct = atoi(optarg);
@@ -165,7 +178,7 @@ int main(int argc, char *argv[]) {
                 output_file = optarg;
                 break;
             case '?':
-                if (optopt == 'c')
+                if (optopt == 's' || optopt == 'p')
                     fprintf (stderr, "Option -%c requires an argument.\n",
                             optopt);
                 else if (isprint (optopt))
@@ -178,53 +191,83 @@ int main(int argc, char *argv[]) {
                 abort ();
         }
     }
-    return 0;
 
-    vector<process*> p1 = parser(), p2, p3, p4, p5;
-    vector<gantt*> ganttDiagramS, ganttDiagramF, ganttDiagramP, ganttDiagramRR,
-        ganttDiagramPrioRR;
-    const int num_threads = 5;
-    std::thread schedulings[num_threads];
+    vector<sch_answer> containers(num_sch);
+    vector<sch_answer>::iterator contIt;
+    containers[0].initial_processes = parser();
+    for (contIt = containers.begin() + 1; contIt != containers.end(); contIt++)
+        copyProccess(&(contIt->initial_processes),
+                containers[0].initial_processes);
 
-    copyProccess(&p2, p1);
-    copyProccess(&p3, p1);
-    copyProccess(&p4, p1);
-    copyProccess(&p5, p1);
+    thread schedulings[num_sch];
 
-    scheduleSJF s(p1);
-    scheduleFCFS f(p2);
-    schedulePrio p(p3);
-    scheduleRR rr(p4, quantum);
-    schedulePrioRR prr(p5, quantum);
-
-    schedulings[0] = std::thread(processSJF,  &s, &ganttDiagramS, sjf_pre, cct); // scheduleSJF
-    schedulings[1] = std::thread(processFCFS, &f, &ganttDiagramF, cct); // scheduleFCFS
-    schedulings[2] = std::thread(processPRIO, &p, &ganttDiagramP, prio_pre, cct); // schedulePrio
-    schedulings[3] = std::thread(processRR, &rr, &ganttDiagramRR, cct); // scheduleRR
-    schedulings[4] = std::thread(processPrioRR, &prr, &ganttDiagramPrioRR, cct); // schedulePrioRR
+    for (int i = 0, nt = 0; i < NSCHDS; i++) {
+        if (schedules[i]) {
+            switch (i) {
+                case FCFS:
+                    schedulings[nt] = thread(processFCFS,
+                            new scheduleFCFS(containers[nt].initial_processes),
+                            &(containers[nt]), cct);
+                    break;
+                case SJF:
+                    schedulings[nt] = thread(processSJF,
+                            new scheduleSJF(containers[nt].initial_processes),
+                            &(containers[nt]), sjf_pre, cct);
+                    break;
+                case PRIO:
+                    schedulings[nt] = thread(processPRIO,
+                            new schedulePrio(containers[nt].initial_processes),
+                            &(containers[nt]), prio_pre, cct);
+                    break;
+                case RR:
+                    schedulings[nt] = thread(processRR,
+                            new scheduleRR(containers[nt].initial_processes, quantum),
+                            &(containers[nt]), cct);
+                    break;
+                case PRIO_RR:
+                    schedulings[nt] = thread(processPrioRR,
+                            new schedulePrioRR(containers[nt].initial_processes, quantum),
+                            &(containers[nt]), cct);
+                    break;
+                default:
+                    fprintf(stderr, "[ERROR] Unknown scheduling number %d", i);
+                    abort();
+            }
+            nt++;
+        }
+    }
 
     //Join the threads with the main thread
-    for (int i = 0; i < num_threads; ++i)
+    for (int i = 0; i < num_sch; ++i)
         schedulings[i].join();
 
-    printTitle("scheduleSJF ");
-    printGannttDiagram(ganttDiagramS);
-    printAverage(s.getProcesses());
 
-    printTitle("scheduleFCFS");
-    printGannttDiagram(ganttDiagramF);
-    printAverage(f.getProcesses());
-
-    printTitle("schedulePrio");
-    printGannttDiagram(ganttDiagramP);
-    printAverage(p.getProcesses());
-
-    printTitle("scheduleRR");
-    printGannttDiagram(ganttDiagramRR);
-    printAverage(rr.getProcesses());
-
-    printTitle("schedulePrioRR");
-    printGannttDiagram(ganttDiagramPrioRR);
-    printAverage(prr.getProcesses());
+    for (int i = 0, nt = 0; i < NSCHDS; i++) {
+        if (schedules[i]) {
+            switch (i) {
+                case FCFS:
+                    printTitle("scheduleSJF ");
+                    break;
+                case SJF:
+                    printTitle("scheduleFCFS");
+                    break;
+                case PRIO:
+                    printTitle("schedulePrio");
+                    break;
+                case RR:
+                    printTitle("scheduleRR");
+                    break;
+                case PRIO_RR:
+                    printTitle("schedulePrioRR");
+                    break;
+                default:
+                    fprintf(stderr, "[ERROR] Unknown scheduling number %d", i);
+                    abort();
+            }
+            printGannttDiagram(containers[nt].ganttDiagram);
+            printAverage(containers[nt].final_processes);
+            nt++;
+        }
+    }
     return 0;
 }
