@@ -438,11 +438,11 @@ scheduleRR::workOn(process* p)
 }
 
 void
-scheduleRR::updateReadyQ()
+scheduleRR::updateReadyQ(int low, int hi)
 {
     std::vector<process*>::iterator it;
     for (it = processes.begin(); it != processes.end(); it++) {
-        if ((*it)->arrivalT == this->elapsed)
+        if (low <= (*it)->arrivalT && (*it)->arrivalT <= hi)
             this->readyQ.push(*it);
     }
 }
@@ -459,11 +459,14 @@ scheduleRR::executePreemptive(std::vector<gantt*>* g, int cct)
     aQuantum = quantum;
 
     while (!finished()) {
-        updateReadyQ();
+        updateReadyQ(elapsed, elapsed);
         if (aProc == NULL || aQuantum == 0) {
             if (aProc != NULL) {
                 readyQ.push(aProc);
-                elapsed += cct;
+                if (aProc != readyQ.front() && cct != 0) {
+                    updateReadyQ(elapsed + 1, elapsed + cct);
+                    elapsed += cct;
+                }
             }
 
             aProc = readyQ.front();
@@ -534,11 +537,11 @@ schedulePrioRR::workOn(process* p)
 }
 
 void
-schedulePrioRR::updateReadyQ()
+schedulePrioRR::updateReadyQ(int low, int hi)
 {
     std::vector<process*>::iterator it;
     for (it = processes.begin(); it != processes.end(); it++) {
-        if ((*it)->arrivalT == this->elapsed)
+        if (low <= (*it)->arrivalT && (*it)->arrivalT <= hi)
             this->readyQ.push(*it);
     }
 }
@@ -555,13 +558,14 @@ schedulePrioRR::executePreemptive(std::vector<gantt*>* g, int cct)
     aQuantum = quantum;
 
     while (!finished()) {
-        updateReadyQ();
+        updateReadyQ(elapsed, elapsed);
         if (aProc == NULL || aQuantum == 0) {
             if (aProc != NULL) {
-                if (aProc != readyQ.top()) {
+                readyQ.push(aProc);
+                if (aProc != readyQ.top() && cct != 0) {
+                    updateReadyQ(elapsed + 1, elapsed + cct);
                     elapsed += cct;
                 }
-                readyQ.push(aProc);
             }
 
             aProc = readyQ.top();

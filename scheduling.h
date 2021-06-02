@@ -77,7 +77,7 @@ class scheduleRR {
         std::queue<process*> readyQ;
         bool finished();
         void workOn(process*);
-        void updateReadyQ();
+        void updateReadyQ(int low, int hi);
     public:
         scheduleRR(std::vector<process*> processes, int quantum);
         std::vector<process*> getProcesses();
@@ -93,7 +93,7 @@ class schedulePrioRR {
             readyQ;
         bool finished();
         void workOn(process*);
-        void updateReadyQ();
+        void updateReadyQ(int low, int hi);
     public:
         schedulePrioRR(std::vector<process*> processes, int quantum);
         std::vector<process*> getProcesses();
