@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -121,8 +122,9 @@ int main(int argc, char *argv[]) {
         false           // Priority round Robin
     };
     bool sjf_pre, prio_pre;
-    char *output_file;
+    char *output_file = NULL;
     int argIndex, cct = 0, flag, num_sch = 0, quantum = 2;
+    ofstream filestr;
 
     while ((flag = getopt(argc, argv, "fs:p:rRq:c:o:")) != -1) {
         switch (flag) {
@@ -190,6 +192,11 @@ int main(int argc, char *argv[]) {
             default:
                 abort ();
         }
+    }
+    
+    if (output_file != NULL) {
+        filestr.open (output_file);
+        cout.rdbuf(filestr.rdbuf());        // assign streambuf to cout
     }
 
     vector<sch_answer> containers(num_sch);
@@ -269,5 +276,8 @@ int main(int argc, char *argv[]) {
             nt++;
         }
     }
+
+    if (output_file != NULL)
+        filestr.close();
     return 0;
 }
