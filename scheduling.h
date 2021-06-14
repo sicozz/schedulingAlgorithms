@@ -6,6 +6,8 @@
 #include <iomanip>
 #include "gantt.h"
 #include <stdio.h>
+#include <algorithm>
+
 struct process {
     std::string pid;
     int priority;
@@ -14,6 +16,22 @@ struct process {
     int remainingT;
     int responseT;
     int completionT;
+};
+
+struct interval {
+    int start;
+    int end;
+    int count;
+    int deadline;
+};
+
+
+struct procces_rt {
+    std::string pid;
+    int capacity;
+    int period;
+    int deadline;
+    std::vector<interval*> intervalos;
 };
 
 class processCompare {
@@ -29,6 +47,8 @@ int responseT(process p);
 float avgWaitT(std::vector<process*> procVec);
 float avgTurnAroundT(std::vector<process*> procVec);
 float avgResponseT(std::vector<process*> procVec);
+int setLeastCommonMultiple(std::vector<int> v);
+int gcd(int a, int b);
 
 class scheduleSJF {
     private:
@@ -99,4 +119,30 @@ class schedulePrioRR {
         std::vector<process*> getProcesses();
         void executePreemptive(std::vector<gantt*>* g, int cct);
 };
+
+class scheduleRM {
+    private:
+        int LCM;
+        std::vector<procces_rt*> processes;
+        void setIntervalos();
+        static bool compare(procces_rt* a, procces_rt* b);
+        procces_rt* fetch(int timeStart, int timeEnd);
+        interval* getInterval(procces_rt* t, int timeStart, int timeEnd);
+    public:
+        void executePreemptive(std::vector<gantt*>* g, int cct);
+        scheduleRM (std::vector<procces_rt*> processes);
+};
+
+class scheduleEDF {
+    private:
+        int LCM;
+        std::vector<procces_rt*> processes;
+        void setIntervalos();
+        procces_rt* fetch(int timeStart, int timeEnd);
+        interval* getInterval(procces_rt* t, int timeStart, int timeEnd);
+    public:
+        void executePreemptive(std::vector<gantt*>* g, int cct);
+        scheduleEDF (std::vector<procces_rt*> processes);
+};
+
 #endif

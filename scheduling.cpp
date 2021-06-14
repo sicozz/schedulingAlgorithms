@@ -104,6 +104,30 @@ avgResponseT(std::vector<process*> procVec) {
     return (total/float(procVec.size()));
 }
 
+int
+gcd(int a,int b) {
+
+    if (b == 0)
+        return a;
+    return gcd(b , a % b);
+}
+
+int
+setLeastCommonMultiple(std::vector<int> periods) {
+
+    /*
+     * Tomado de : https://www.geeksforgeeks.org/lcm-of-given-array-elements/
+     */
+    int n, i, ans;
+
+    ans = periods[0];
+    for (i = 1; i < periods.size(); i++) {
+        ans = ( (periods[i] * ans)) / gcd(periods[i], ans);
+    }
+    return ans;
+}
+
+
 scheduleSJF::scheduleSJF(std::vector<process*> processes) {
     this->processes = processes;
     this->elapsed = 0;
@@ -593,4 +617,194 @@ schedulePrioRR::executePreemptive(std::vector<gantt*>* g, int cct)
         elapsed++;
         aQuantum--;
     }
+}
+
+/* Earliest Deadline First  */
+
+scheduleEDF::scheduleEDF(std::vector<procces_rt*> processes) {
+    this->processes = processes;
+}
+
+
+void
+scheduleEDF::setIntervalos() {
+
+    int i, k, period, limit, start, end;
+
+    for (i = 0; i < processes.size(); i++) {
+        period = processes[i]->period;
+        limit = LCM / period;
+        start = 0;
+        end = period;
+        for (k = 0; k < limit; k++) {
+            interval* e;
+            e = (interval*) malloc(sizeof(interval));
+            e->start = start;
+            e->end = end;
+            e->count = 0;
+            e->deadline = start + processes[i]->deadline;
+            processes[i]->intervalos.push_back(e);
+            start = end;
+            end += period;
+        }
+    }
+}
+
+interval*
+scheduleEDF::getInterval(procces_rt* t, int timeStart, int timeEnd) {
+
+    for (int i = 0; i < t->intervalos.size(); i++) {
+        interval* e = t->intervalos[i];
+        if (timeStart >= e->start && timeEnd < e->end && e->count < t->capacity) {
+            return e;
+        }
+    }
+
+    return NULL;
+}
+
+procces_rt*
+scheduleEDF::fetch(int timeStart, int timeEnd) {
+    int i, k;
+
+    if (processes.size() > 0) {
+        procces_rt* process_min = processes[0];
+        interval* interval_min = getInterval(process_min, timeStart, timeEnd);
+
+        for (i = 1; i < processes.size(); i++) {
+            procces_rt* current_process = processes[i];
+            interval* current_interval = getInterval(current_process, timeStart, timeEnd);
+
+            if (interval_min == NULL) {
+                interval_min = current_interval;
+                process_min = current_process;
+            }
+            else if (current_interval != NULL) {
+                if (current_interval->deadline < interval_min->deadline) {
+                    interval_min = current_interval;
+                    process_min = current_process;
+                }
+            }
+
+        }
+        if (process_min != NULL && interval_min != NULL) {
+            interval_min->count += 1;
+            return process_min;
+        }
+    }
+
+    return NULL;
+}
+
+void
+scheduleEDF::executePreemptive(std::vector<gantt*>* g, int cct) {
+
+    std::vector<int> periods;
+    for (int i = 0; i < processes.size(); i++)
+        periods.push_back(processes[i]->period);
+    LCM = setLeastCommonMultiple(periods);
+    setIntervalos();
+
+    int timeStart = 0, timeEnd = 1;
+    gantt* aGantt;
+    
+    while (timeStart < LCM) {
+
+        string pid = "X";
+        procces_rt* e = fetch(timeStart, timeEnd);
+        if (e != NULL)
+            pid = e->pid;
+
+        aGantt = new gantt {pid, timeStart, timeEnd};
+        g->push_back(aGantt);
+        timeStart = timeEnd;
+        timeEnd = timeEnd + 1;
+    }
+}
+
+/* Rate monotonic */
+
+scheduleRM::scheduleRM(std::vector<procces_rt*> processes) {
+    this->processes = processes;
+}
+
+void
+scheduleRM::setIntervalos() {
+
+    int i, k, period, limit, start, end;
+
+    for (i = 0; i < processes.size(); i++) {
+        period = processes[i]->period;
+        limit = LCM / period;
+        start = 0;
+        end = period;
+        for (k = 0; k < limit; k++) {
+            interval* e;
+            e = (interval*) malloc(sizeof(interval));
+            e->start = start;
+            e->end = end;
+            e->count = 0;
+            processes[i]->intervalos.push_back(e);
+            start = end;
+            end += period;
+        }
+    }
+}
+
+interval*
+scheduleRM::getInterval(procces_rt* t, int timeStart, int timeEnd) {
+
+    for (int i = 0; i < t->intervalos.size(); i++) {
+        interval* e = t->intervalos[i];
+        if (timeStart >= e->start && timeEnd < e->end && e->count < t->capacity) {
+            e->count = e->count + 1;
+            return e;
+        }
+    }
+
+    return NULL;
+}
+
+procces_rt*
+scheduleRM::fetch(int timeStart, int timeEnd) {
+    int i, k;
+    for (i = 0; i < processes.size(); i++) {
+        procces_rt* p = processes[i];
+        if (getInterval(p, timeStart, timeEnd) != NULL)
+            return p;
+    }
+    return NULL;
+}
+
+void
+scheduleRM::executePreemptive(std::vector<gantt*>* g, int cct) {
+
+    std::vector<int> periods;
+    for (int i = 0; i < processes.size(); i++)
+        periods.push_back(processes[i]->period);
+
+    LCM = setLeastCommonMultiple(periods);
+    setIntervalos();
+    sort(processes.begin(), processes.end(), scheduleRM::compare);
+
+    int timeStart = 0, timeEnd = 1;
+    gantt* aGantt;
+
+    while (timeStart < LCM) {
+
+        string pid = "X";
+        procces_rt* e = fetch(timeStart, timeEnd);
+        if (e != NULL)
+            pid = e->pid;
+
+        aGantt = new gantt {pid, timeStart, timeEnd};
+         g->push_back(aGantt);
+        timeStart = timeEnd;
+        timeEnd = timeEnd + 1;
+    }
+}
+
+bool
+scheduleRM::compare(procces_rt* a, procces_rt* b) {
+    return a->period < b->period;
 }

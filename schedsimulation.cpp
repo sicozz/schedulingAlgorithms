@@ -14,7 +14,9 @@
 #define PRIO    2
 #define RR      3
 #define PRIO_RR 4
-#define NSCHDS  5
+#define RM      5
+#define EDF     6
+#define NSCHDS  7
 
 using namespace std;
 
@@ -58,6 +60,17 @@ void processPrioRR(schedulePrioRR* s, sch_answer* sch, int cct) {
     sch->final_processes = s->getProcesses();
 }
 
+void processRM(scheduleRM* s, sch_answer* sch, int cct) {
+    std::cout << "Launched by thread RM"<< std::endl;
+    s->executePreemptive(&(sch->ganttDiagram), cct);
+    //sch->final_processes = s->getProcesses();
+}
+
+void processEDF(scheduleEDF* s, sch_answer* sch, int cct) {
+    std::cout << "Launched by thread EDF"<< std::endl;
+    s->executePreemptive(&(sch->ganttDiagram), cct);
+    //sch->final_processes = s->getProcesses();
+}
 
 vector<process*> parser() {
     int nP;
@@ -95,13 +108,15 @@ void
 usage(const char progName[])
 {
     cout << "usage: " << progName << " [SCHEDULINGS] [OPTIONS]" << endl;
-    cout << "SCHEDULINGS:" << endl << 
+    cout << "SCHEDULINGS:" << endl <<
         "\t-f\t\t\t\tFirst come first serve" << endl <<
         "\t-s pre|nopre\t\t\tShortest job first" << endl <<
         "\t-p pre|nopre\t\t\tPriority" << endl <<
         "\t-r\t\t\t\tRound Robin" << endl <<
-        "\t-R\t\t\t\tPriority Round Robin" << endl;
-    cout << "OPTIONS:" << endl << 
+        "\t-R\t\t\t\tPriority Round Robin" << endl <<
+        "\t-M\t\t\t\tRate Monotonic" << endl <<
+        "\t-E\t\t\t\tEarliest Deadline First" << endl;
+    cout << "OPTIONS:" << endl <<
         "\t-c [n > 0]\t\t\tContext change time" << endl <<
         "\t-q [n > 0]\t\t\tTime quantum" << endl <<
         "\t-o file\t\t\t\tOutput file" << endl;
@@ -119,7 +134,9 @@ int main(int argc, char *argv[]) {
         false,          // Shortest job first
         false,          // Priority
         false,          // Round Robin
-        false           // Priority round Robin
+        false,          // Priority round Robin
+        false,          // Rate monotonic  
+        false           // Earliest Deadline First
     };
     bool sjf_pre, prio_pre;
     char *output_file = NULL;
@@ -170,6 +187,14 @@ int main(int argc, char *argv[]) {
                 schedules[PRIO_RR] = true;
                 num_sch++;
                 break;
+            case 'M':
+                schedules[RM] = true;
+                num_sch++;
+                break;
+            case 'E':
+                schedules[EDF] = true;
+                num_sch++;
+                break;
             case 'c':
                 cct = atoi(optarg);
                 break;
@@ -193,7 +218,7 @@ int main(int argc, char *argv[]) {
                 abort ();
         }
     }
-    
+
     if (output_file != NULL) {
         filestr.open (output_file);
         cout.rdbuf(filestr.rdbuf());        // assign streambuf to cout
@@ -235,6 +260,10 @@ int main(int argc, char *argv[]) {
                     schedulings[nt] = thread(processPrioRR,
                             new schedulePrioRR(containers[nt].initial_processes, quantum),
                             &(containers[nt]), cct);
+                    break;
+                case RM:
+                    break;
+                case EDF:
                     break;
                 default:
                     fprintf(stderr, "[ERROR] Unknown scheduling number %d", i);
