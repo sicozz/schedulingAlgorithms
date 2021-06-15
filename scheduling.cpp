@@ -689,6 +689,10 @@ scheduleEDF::fetch(int timeStart, int timeEnd) {
         }
         if (process_min != NULL && interval_min != NULL) {
             interval_min->count += 1;
+            interval* end_interval = process_min->intervalos[ process_min->intervalos.size() - 1];
+                if (interval_min->start == end_interval->start &&
+                    interval_min->end == end_interval->end && interval_min->count == process_min->capacity)
+                        process_min->completionT = timeEnd;
             return process_min;
         }
     }
@@ -712,8 +716,11 @@ scheduleEDF::executePreemptive(std::vector<gantt*>* g, int cct) {
 
         string pid = "X";
         process* e = fetch(timeStart, timeEnd);
-        if (e != NULL)
+        if (e != NULL) {
+            if (e->responseT == -1)
+                e->responseT = timeStart;
             pid = e->pid;
+        }
 
         aGantt = new gantt {pid, timeStart, timeEnd};
         g->push_back(aGantt);
@@ -762,6 +769,9 @@ scheduleRM::getInterval(process* t, int timeStart, int timeEnd) {
         interval* e = t->intervalos[i];
         if (timeStart >= e->start && timeEnd < e->end && e->count < t->capacity) {
             e->count = e->count + 1;
+            interval* end_interval = t->intervalos[ t->intervalos.size() - 1];
+            if (e->start == end_interval->start && e->end == end_interval->end && e->count == t->capacity)
+                    t->completionT = timeEnd;
             return e;
         }
     }
@@ -798,8 +808,11 @@ scheduleRM::executePreemptive(std::vector<gantt*>* g, int cct) {
 
         string pid = "X";
         process* e = fetch(timeStart, timeEnd);
-        if (e != NULL)
+        if (e != NULL) {
+            if (e->responseT == -1)
+                e->responseT = timeStart;
             pid = e->pid;
+        }
 
         aGantt = new gantt {pid, timeStart, timeEnd};
          g->push_back(aGantt);
