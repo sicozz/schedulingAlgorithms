@@ -10,42 +10,21 @@ void printAverage(std::vector<process*> procVec) {
     waitT = avgWaitT(procVec);
     responseT = avgResponseT(procVec);
 
-    cout << ANSI_COLOR_CYAN << "\t\t+----------------------------------+" << endl;
-    cout << "\t\t|" << ANSI_COLOR_RESET;
-    cout << ANSI_COLOR_MAGENTA << "             AVERAGE              " << ANSI_COLOR_RESET;
-    cout << ANSI_COLOR_CYAN << "|" << endl;
-    cout << "\t\t+----------------------------------+" << ANSI_COLOR_RESET << endl;
-    cout << ANSI_COLOR_CYAN << setw( 62 ) <<
-    setfill( '-' ) << '\n' << setfill( ' ' ) << endl;
-
-    cout << "| " << ANSI_COLOR_RESET
-    << left <<  ANSI_COLOR_YELLOW << setw( 18 )
-    << "Turnaround Time" << ANSI_COLOR_RESET;
-
-    cout << ANSI_COLOR_CYAN << "| " << ANSI_COLOR_RESET
-    << left <<  ANSI_COLOR_YELLOW << setw( 18 )
-    << "Waiting Time" << ANSI_COLOR_RESET;
-
-    cout << ANSI_COLOR_CYAN << "| " << ANSI_COLOR_RESET
-    << left << ANSI_COLOR_YELLOW << setw( 18 )
-    << "Response Time" << ANSI_COLOR_RESET;
-
-
-    cout << ANSI_COLOR_CYAN << "|"<< setw( 62 ) <<
-    setfill( '-' ) << '\n' << setfill( ' ' ) << ANSI_COLOR_RESET << endl;
-    cout << ANSI_COLOR_CYAN << "| " << ANSI_COLOR_RESET
-    << left <<  ANSI_COLOR_BLUE << setw( 18 )
-    << turnAroundT << ANSI_COLOR_RESET;
-
-    cout << ANSI_COLOR_CYAN << "| " << ANSI_COLOR_RESET
-    << left <<  ANSI_COLOR_BLUE << setw( 18 )
-    << waitT << ANSI_COLOR_RESET;
-
-    cout << ANSI_COLOR_CYAN << "| " << ANSI_COLOR_RESET
-    << left <<  ANSI_COLOR_BLUE << setw( 18 )
-    << responseT << ANSI_COLOR_RESET;
-    cout << ANSI_COLOR_CYAN<< "|"<< setw( 62 ) <<
-    setfill( '-' ) << '\n' << setfill( ' ' ) << ANSI_COLOR_RESET << endl << endl;
+    cout << _CYAN << "\t\t+----------------------------------+" << endl;
+    cout << "\t\t|" << _RESET;
+    cout << _MAGENTA << "             AVERAGE              " << _RESET;
+    cout << _CYAN << "|" << endl;
+    cout << "\t\t+----------------------------------+" << _RESET << endl;
+    cout << _CYAN << setw( 62 ) << setfill( '-' ) << '\n' << setfill( ' ' ) << endl;
+    cout << "| " << _RESET << left <<  _YELLOW << setw( 18 ) << "Turnaround Time" << _RESET;
+    cout << _CYAN << "| " << _RESET << left <<  _YELLOW << setw( 18 ) << "Waiting Time" << _RESET;
+    cout << _CYAN << "| " << _RESET << left << _YELLOW << setw( 18 ) << "Response Time" << _RESET;
+    cout << _CYAN << "|"<< setw( 62 ) <<
+    setfill( '-' ) << '\n' << setfill( ' ' ) << _RESET << endl;
+    cout << _CYAN << "| " << _RESET << left <<  _BLUE << setw( 18 ) << turnAroundT << _RESET;
+    cout << _CYAN << "| " << _RESET << left <<  _BLUE << setw( 18 ) << waitT << _RESET;
+    cout << _CYAN << "| " << _RESET << left <<  _BLUE << setw( 18 ) << responseT << _RESET;
+    cout << _CYAN<< "|"<< setw( 62 ) << setfill( '-' ) << '\n' << setfill( ' ' ) << _RESET << endl << endl;
 }
 
 bool processCompare::operator ()(const process* pa, const process* pb)
@@ -56,7 +35,7 @@ bool processCompare::operator ()(const process* pa, const process* pb)
 int turnAroundT(process p) {
 
     if (p.completionT == -1) {
-        fprintf(stderr, "Error: Turn Around Time for non completed process");
+        fprintf(stderr, _RED "Error: Turn Around Time for non completed process\n" _RESET);
         return -1;
     }
     return p.completionT - p.arrivalT;
@@ -64,7 +43,7 @@ int turnAroundT(process p) {
 
 int waitT(process p) {
     if (p.completionT == -1) {
-        fprintf(stderr, "Error: Wait Time for non completed process");
+        fprintf(stderr, _RED "Error: Wait Time for non completed process\n" _RESET);
         return -1;
     }
     return (turnAroundT(p) - p.burstT);
@@ -73,7 +52,7 @@ int waitT(process p) {
 int responseT(process p) {
 
     if (p.responseT == -1) {
-        fprintf(stderr, "Error: Response Time for non completed process");
+        fprintf(stderr, _RED "Error: Response Time for non completed process\n" _RESET);
         return -1;
     }
 
@@ -703,6 +682,10 @@ scheduleEDF::fetch(int timeStart, int timeEnd) {
 void
 scheduleEDF::executePreemptive(std::vector<gantt*>* g, int cct) {
 
+    if (processes.size() > 0 && (processes[0]->capacity <= 0 || processes[0]->period <= 0 || processes[0]->deadline <= 0)) {
+        fprintf(stderr, _RED "\n\n***Error, scheduleEarliest Deadline First no se peude ejecutrar***\n\n" _RESET);
+        return;
+    }
     std::vector<int> periods;
     for (int i = 0; i < processes.size(); i++)
         periods.push_back(processes[i]->period);
@@ -793,6 +776,10 @@ scheduleRM::fetch(int timeStart, int timeEnd) {
 void
 scheduleRM::executePreemptive(std::vector<gantt*>* g, int cct) {
 
+    if (processes.size() > 0 && (processes[0]->capacity <= 0 || processes[0]->period <= 0 || processes[0]->deadline <= 0)) {
+        fprintf(stderr, _RED "\n\n***Error, scheduleEarliest Deadline First no se peude ejecutrar***\n\n" _RESET);
+        return;
+    }
     std::vector<int> periods;
     for (int i = 0; i < processes.size(); i++)
         periods.push_back(processes[i]->period);

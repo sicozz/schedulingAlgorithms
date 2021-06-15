@@ -148,7 +148,6 @@ int main(int argc, char *argv[]) {
     ofstream filestr;
 
     while ((flag = getopt(argc, argv, "fs:p:rRq:c:o:mM:eE")) != -1) {
-        printf("%c\n", flag);
         switch (flag) {
             case 'f':
                 schedules[FCFS] = true;
