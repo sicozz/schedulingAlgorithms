@@ -26,6 +26,7 @@ struct sch_answer {
     vector<process*> final_processes;
 };
 
+
 void processSJF(scheduleSJF* s, sch_answer* sch , bool isPreemtive, int cct) {
     std::cout << "Launched by thread SJF" << std::endl;
     if (!isPreemtive)
@@ -63,13 +64,13 @@ void processPrioRR(schedulePrioRR* s, sch_answer* sch, int cct) {
 void processRM(scheduleRM* s, sch_answer* sch, int cct) {
     std::cout << "Launched by thread RM"<< std::endl;
     s->executePreemptive(&(sch->ganttDiagram), cct);
-    //sch->final_processes = s->getProcesses();
+    sch->final_processes = s->getProcesses();
 }
 
 void processEDF(scheduleEDF* s, sch_answer* sch, int cct) {
     std::cout << "Launched by thread EDF"<< std::endl;
     s->executePreemptive(&(sch->ganttDiagram), cct);
-    //sch->final_processes = s->getProcesses();
+    sch->final_processes = s->getProcesses();
 }
 
 vector<process*> parser() {
@@ -79,6 +80,9 @@ vector<process*> parser() {
     cin >> nP;
     while(nP--) {
         cin >> proc->pid >> proc->priority >> proc->arrivalT >> proc->burstT;
+        proc->capacity = proc->priority;
+        proc->deadline = proc->arrivalT;
+        proc->period = proc->burstT;
         proc->remainingT = proc->burstT;
         proc->responseT = -1;
         proc->completionT = -1;
@@ -135,7 +139,7 @@ int main(int argc, char *argv[]) {
         false,          // Priority
         false,          // Round Robin
         false,          // Priority round Robin
-        false,          // Rate monotonic  
+        false,          // Rate monotonic
         false           // Earliest Deadline First
     };
     bool sjf_pre, prio_pre;
@@ -143,7 +147,8 @@ int main(int argc, char *argv[]) {
     int argIndex, cct = 0, flag, num_sch = 0, quantum = 2;
     ofstream filestr;
 
-    while ((flag = getopt(argc, argv, "fs:p:rRq:c:o:")) != -1) {
+    while ((flag = getopt(argc, argv, "fs:p:rRq:c:o:mM:eE")) != -1) {
+        printf("%c\n", flag);
         switch (flag) {
             case 'f':
                 schedules[FCFS] = true;
@@ -187,11 +192,11 @@ int main(int argc, char *argv[]) {
                 schedules[PRIO_RR] = true;
                 num_sch++;
                 break;
-            case 'M':
+            case 'm':
                 schedules[RM] = true;
                 num_sch++;
                 break;
-            case 'E':
+            case 'e':
                 schedules[EDF] = true;
                 num_sch++;
                 break;
@@ -262,8 +267,14 @@ int main(int argc, char *argv[]) {
                             &(containers[nt]), cct);
                     break;
                 case RM:
+                    schedulings[nt] = thread(processRM,
+                            new scheduleRM(containers[nt].initial_processes),
+                            &(containers[nt]), cct);
                     break;
                 case EDF:
+                    schedulings[nt] = thread(processEDF,
+                            new scheduleEDF(containers[nt].initial_processes),
+                            &(containers[nt]), cct);
                     break;
                 default:
                     fprintf(stderr, "[ERROR] Unknown scheduling number %d", i);
@@ -295,6 +306,12 @@ int main(int argc, char *argv[]) {
                     break;
                 case PRIO_RR:
                     printTitle("schedulePrioRR");
+                    break;
+                case RM:
+                    printTitle("scheduleRM");
+                    break;
+                case EDF:
+                    printTitle("scheduleEDF");
                     break;
                 default:
                     fprintf(stderr, "[ERROR] Unknown scheduling number %d", i);

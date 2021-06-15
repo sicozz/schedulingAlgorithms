@@ -8,15 +8,6 @@
 #include <stdio.h>
 #include <algorithm>
 
-struct process {
-    std::string pid;
-    int priority;
-    int arrivalT;
-    int burstT;
-    int remainingT;
-    int responseT;
-    int completionT;
-};
 
 struct interval {
     int start;
@@ -25,14 +16,33 @@ struct interval {
     int deadline;
 };
 
+struct process {
+    std::string pid;
+    int priority;
+    int arrivalT;
+    int burstT;
+    int remainingT;
+    int responseT;
+    int completionT;
 
-struct procces_rt {
+    /* REAL TIME */
+    int capacity;
+    int period;
+    int deadline;
+    std::vector<interval*> intervalos;
+
+};
+
+
+
+/*
+struct process {
     std::string pid;
     int capacity;
     int period;
     int deadline;
     std::vector<interval*> intervalos;
-};
+};*/
 
 class processCompare {
     public:
@@ -123,26 +133,28 @@ class schedulePrioRR {
 class scheduleRM {
     private:
         int LCM;
-        std::vector<procces_rt*> processes;
+        std::vector<process*> processes;
         void setIntervalos();
-        static bool compare(procces_rt* a, procces_rt* b);
-        procces_rt* fetch(int timeStart, int timeEnd);
-        interval* getInterval(procces_rt* t, int timeStart, int timeEnd);
+        static bool compare(process* a, process* b);
+        process* fetch(int timeStart, int timeEnd);
+        interval* getInterval(process* t, int timeStart, int timeEnd);
     public:
+        scheduleRM (std::vector<process*> processes);
         void executePreemptive(std::vector<gantt*>* g, int cct);
-        scheduleRM (std::vector<procces_rt*> processes);
+        std::vector<process*> getProcesses();
 };
 
 class scheduleEDF {
     private:
         int LCM;
-        std::vector<procces_rt*> processes;
+        std::vector<process*> processes;
         void setIntervalos();
-        procces_rt* fetch(int timeStart, int timeEnd);
-        interval* getInterval(procces_rt* t, int timeStart, int timeEnd);
+        process* fetch(int timeStart, int timeEnd);
+        interval* getInterval(process* t, int timeStart, int timeEnd);
     public:
+        scheduleEDF (std::vector<process*> processes);
         void executePreemptive(std::vector<gantt*>* g, int cct);
-        scheduleEDF (std::vector<procces_rt*> processes);
+        std::vector<process*> getProcesses();
 };
 
 #endif

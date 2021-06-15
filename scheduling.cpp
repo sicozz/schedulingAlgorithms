@@ -621,7 +621,7 @@ schedulePrioRR::executePreemptive(std::vector<gantt*>* g, int cct)
 
 /* Earliest Deadline First  */
 
-scheduleEDF::scheduleEDF(std::vector<procces_rt*> processes) {
+scheduleEDF::scheduleEDF(std::vector<process*> processes) {
     this->processes = processes;
 }
 
@@ -651,7 +651,7 @@ scheduleEDF::setIntervalos() {
 }
 
 interval*
-scheduleEDF::getInterval(procces_rt* t, int timeStart, int timeEnd) {
+scheduleEDF::getInterval(process* t, int timeStart, int timeEnd) {
 
     for (int i = 0; i < t->intervalos.size(); i++) {
         interval* e = t->intervalos[i];
@@ -663,16 +663,16 @@ scheduleEDF::getInterval(procces_rt* t, int timeStart, int timeEnd) {
     return NULL;
 }
 
-procces_rt*
+process*
 scheduleEDF::fetch(int timeStart, int timeEnd) {
     int i, k;
 
     if (processes.size() > 0) {
-        procces_rt* process_min = processes[0];
+        process* process_min = processes[0];
         interval* interval_min = getInterval(process_min, timeStart, timeEnd);
 
         for (i = 1; i < processes.size(); i++) {
-            procces_rt* current_process = processes[i];
+            process* current_process = processes[i];
             interval* current_interval = getInterval(current_process, timeStart, timeEnd);
 
             if (interval_min == NULL) {
@@ -707,11 +707,11 @@ scheduleEDF::executePreemptive(std::vector<gantt*>* g, int cct) {
 
     int timeStart = 0, timeEnd = 1;
     gantt* aGantt;
-    
+
     while (timeStart < LCM) {
 
         string pid = "X";
-        procces_rt* e = fetch(timeStart, timeEnd);
+        process* e = fetch(timeStart, timeEnd);
         if (e != NULL)
             pid = e->pid;
 
@@ -722,9 +722,13 @@ scheduleEDF::executePreemptive(std::vector<gantt*>* g, int cct) {
     }
 }
 
+std::vector<process*>
+scheduleEDF::getProcesses() {
+    return processes;
+}
 /* Rate monotonic */
 
-scheduleRM::scheduleRM(std::vector<procces_rt*> processes) {
+scheduleRM::scheduleRM(std::vector<process*> processes) {
     this->processes = processes;
 }
 
@@ -752,7 +756,7 @@ scheduleRM::setIntervalos() {
 }
 
 interval*
-scheduleRM::getInterval(procces_rt* t, int timeStart, int timeEnd) {
+scheduleRM::getInterval(process* t, int timeStart, int timeEnd) {
 
     for (int i = 0; i < t->intervalos.size(); i++) {
         interval* e = t->intervalos[i];
@@ -765,11 +769,11 @@ scheduleRM::getInterval(procces_rt* t, int timeStart, int timeEnd) {
     return NULL;
 }
 
-procces_rt*
+process*
 scheduleRM::fetch(int timeStart, int timeEnd) {
     int i, k;
     for (i = 0; i < processes.size(); i++) {
-        procces_rt* p = processes[i];
+        process* p = processes[i];
         if (getInterval(p, timeStart, timeEnd) != NULL)
             return p;
     }
@@ -793,7 +797,7 @@ scheduleRM::executePreemptive(std::vector<gantt*>* g, int cct) {
     while (timeStart < LCM) {
 
         string pid = "X";
-        procces_rt* e = fetch(timeStart, timeEnd);
+        process* e = fetch(timeStart, timeEnd);
         if (e != NULL)
             pid = e->pid;
 
@@ -805,6 +809,11 @@ scheduleRM::executePreemptive(std::vector<gantt*>* g, int cct) {
 }
 
 bool
-scheduleRM::compare(procces_rt* a, procces_rt* b) {
+scheduleRM::compare(process* a, process* b) {
     return a->period < b->period;
+}
+
+std::vector<process*>
+scheduleRM::getProcesses() {
+    return processes;
 }
