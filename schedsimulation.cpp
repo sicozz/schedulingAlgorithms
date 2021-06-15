@@ -118,8 +118,8 @@ usage(const char progName[])
         "\t-p pre|nopre\t\t\tPriority" << endl <<
         "\t-r\t\t\t\tRound Robin" << endl <<
         "\t-R\t\t\t\tPriority Round Robin" << endl <<
-        "\t-M\t\t\t\tRate Monotonic" << endl <<
-        "\t-E\t\t\t\tEarliest Deadline First" << endl;
+        "\t-m\t\t\t\tRate Monotonic" << endl <<
+        "\t-e\t\t\t\tEarliest Deadline First" << endl;
     cout << "OPTIONS:" << endl <<
         "\t-c [n > 0]\t\t\tContext change time" << endl <<
         "\t-q [n > 0]\t\t\tTime quantum" << endl <<
