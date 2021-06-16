@@ -669,9 +669,9 @@ scheduleEDF::fetch(int timeStart, int timeEnd) {
         if (process_min != NULL && interval_min != NULL) {
             interval_min->count += 1;
             interval* end_interval = process_min->intervalos[ process_min->intervalos.size() - 1];
-                if (interval_min->start == end_interval->start &&
-                    interval_min->end == end_interval->end && interval_min->count == process_min->capacity)
-                        process_min->completionT = timeEnd;
+            if (interval_min->start == end_interval->start &&
+                interval_min->end == end_interval->end && interval_min->count == process_min->capacity)
+                    process_min->completionT = timeEnd;
             return process_min;
         }
     }
@@ -682,7 +682,7 @@ scheduleEDF::fetch(int timeStart, int timeEnd) {
 void
 scheduleEDF::executePreemptive(std::vector<gantt*>* g, int cct) {
 
-    if (processes.size() > 0 && (processes[0]->capacity <= 0 || processes[0]->period <= 0 || processes[0]->deadline <= 0)) {
+    if (processes.size() > 0 && processes[0]->capacity <= 0 ) {
         fprintf(stderr, _RED "\n\n***Error, scheduleEarliest Deadline First no se peude ejecutrar***\n\n" _RESET);
         return;
     }
@@ -776,8 +776,8 @@ scheduleRM::fetch(int timeStart, int timeEnd) {
 void
 scheduleRM::executePreemptive(std::vector<gantt*>* g, int cct) {
 
-    if (processes.size() > 0 && (processes[0]->capacity <= 0 || processes[0]->period <= 0 || processes[0]->deadline <= 0)) {
-        fprintf(stderr, _RED "\n\n***Error, scheduleEarliest Deadline First no se peude ejecutrar***\n\n" _RESET);
+    if (processes.size() > 0 && processes[0]->capacity <= 0 ) {
+        fprintf(stderr, _RED "\n\n***Error, RM no se peude ejecutrar***\n\n" _RESET);
         return;
     }
     std::vector<int> periods;
@@ -802,7 +802,7 @@ scheduleRM::executePreemptive(std::vector<gantt*>* g, int cct) {
         }
 
         aGantt = new gantt {pid, timeStart, timeEnd};
-         g->push_back(aGantt);
+        g->push_back(aGantt);
         timeStart = timeEnd;
         timeEnd = timeEnd + 1;
     }
