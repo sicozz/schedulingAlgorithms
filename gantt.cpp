@@ -24,6 +24,30 @@ void printTitle(string str) {
 
 }
 
+
+void comparativaRealTime(vector<gantt*> ganttA, vector<gantt*> ganttB) {
+    int rm_timeOut = 0, edf_timeOut = 0;
+
+    for (int i = 0; i < ganttA.size(); i++)
+        if (ganttA[i]->label == "X") rm_timeOut++;
+
+    for (int i = 0; i < ganttB.size(); i++)
+        if (ganttB[i]->label == "X") edf_timeOut++;
+
+
+    cout << _CYAN << "\t+-----------------------------------------+" << endl;
+    cout << "\t|" << _RESET;
+    cout << _MAGENTA << "       COMPARATIVA TIEMPO MUERTO         " << _RESET;
+    cout << _CYAN << "|" << endl;
+    cout << "\t+-----------------------------------------+" << _RESET << endl;
+
+    if (ganttA.size() > 0)
+        cout << _YELLOW << "\t+ RATE MONOTONIC:        \t\t" << _GREEN << rm_timeOut << endl;
+    if (ganttB.size() > 0)
+        cout << _YELLOW <<  "\t+ EARLIEST DEADLINE FIRST:\t\t" << _GREEN << edf_timeOut << _RESET << endl;
+    cout << endl;
+
+}
 void printGannttDiagram(vector<gantt*> ganttDiagram) {
 
     int size = ganttDiagram.size(), first = 1, startp, endp;

@@ -17,7 +17,7 @@
 #define RM      5
 #define EDF     6
 #define NSCHDS  7
-
+#define NONE   -1
 using namespace std;
 
 struct sch_answer {
@@ -104,6 +104,10 @@ void copyProccess(vector<process*>* dst, vector<process*> src) {
             proc->remainingT = (*it)->remainingT;
             proc->responseT = (*it)->responseT;
             proc->completionT = (*it)->completionT;
+            proc->period = (*it)->period;
+            proc->capacity = (*it)->capacity;
+            proc->deadline = (*it)->period;
+            proc->intervalos = (*it)->intervalos;
             dst->push_back(proc);
     }
 }
@@ -148,7 +152,6 @@ int main(int argc, char *argv[]) {
     ofstream filestr;
 
     while ((flag = getopt(argc, argv, "fs:p:rRq:c:o:mM:eE")) != -1) {
-        printf("%c\n", flag);
         switch (flag) {
             case 'f':
                 schedules[FCFS] = true;
@@ -233,8 +236,7 @@ int main(int argc, char *argv[]) {
     vector<sch_answer>::iterator contIt;
     containers[0].initial_processes = parser();
     for (contIt = containers.begin() + 1; contIt != containers.end(); contIt++)
-        copyProccess(&(contIt->initial_processes),
-                containers[0].initial_processes);
+        copyProccess(&(contIt->initial_processes), containers[0].initial_processes);
 
     thread schedulings[num_sch];
 
@@ -288,9 +290,27 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < num_sch; ++i)
         schedulings[i].join();
 
+    /*cout << "diretion r: " << &containers[0].ganttDiagram << endl;
+    for(int i = 0; i < containers[0].ganttDiagram.size(); i++) {
+        cout << "#" << i << " : " << &(containers[0].ganttDiagram[i]) << " label: ";
+        cout << (containers[0].ganttDiagram[i])->label << endl;
+    }
 
+    cout << "\ndiretion e: " << &containers[1].ganttDiagram << endl;
+    for(int i = 0; i < containers[1].ganttDiagram.size(); i++) {
+        cout << "#" << i << " : " << &(containers[1].ganttDiagram[i]) << " label: ";
+        cout << (containers[1].ganttDiagram[i])->label << endl;
+    }
+    return 0;*/
+
+    //printGannttDiagram(containers[0].ganttDiagram);
+    //printGannttDiagram(containers[1].ganttDiagram);
+
+
+    int realTimeRM = NONE, realTimeEDF = NONE;
     for (int i = 0, nt = 0; i < NSCHDS; i++) {
         if (schedules[i]) {
+            bool flag = false;
             switch (i) {
                 case FCFS:
                     printTitle("scheduleSJF ");
@@ -308,20 +328,28 @@ int main(int argc, char *argv[]) {
                     printTitle("schedulePrioRR");
                     break;
                 case RM:
-                    printTitle("scheduleRM");
+                    printTitle("scheduleRM  ");
+                    realTimeRM = nt, flag = true;
                     break;
                 case EDF:
-                    printTitle("scheduleEDF");
+                    printTitle("scheduleEDF ");
+                    realTimeEDF = nt, flag = true;
                     break;
                 default:
                     fprintf(stderr, "[ERROR] Unknown scheduling number %d", i);
                     abort();
             }
+
+            if (!flag) printAverage(containers[nt].final_processes);
             printGannttDiagram(containers[nt].ganttDiagram);
-            printAverage(containers[nt].final_processes);
             nt++;
         }
     }
+
+    vector<gantt*> rm, edf;
+    if (realTimeRM != NONE) rm = containers[realTimeRM].ganttDiagram;
+    if (realTimeEDF != NONE) edf = containers[realTimeEDF].ganttDiagram;
+    if (rm.size() > 0 || edf.size()) comparativaRealTime(rm, edf);
 
     if (output_file != NULL)
         filestr.close();

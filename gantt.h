@@ -22,5 +22,6 @@ struct gantt {
 
 void printGannttDiagram(std::vector<gantt*> );
 std::string formatString(std::string, int );
+void comparativaRealTime(std::vector<gantt*> ganttA, std::vector<gantt*> ganttB);
 
 #endif

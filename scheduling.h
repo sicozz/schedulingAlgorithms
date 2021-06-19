@@ -73,7 +73,6 @@ class scheduleSJF {
         void executePreemptive(std::vector<gantt*>* g, int cct);
 };
 
-
 class scheduleFCFS {
     private:
         std::vector<process*> processes;

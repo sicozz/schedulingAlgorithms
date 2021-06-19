@@ -3,6 +3,7 @@
 
 using namespace std;
 
+
 void printAverage(std::vector<process*> procVec) {
 
     float turnAroundT, waitT, responseT;
@@ -669,9 +670,10 @@ scheduleEDF::fetch(int timeStart, int timeEnd) {
         if (process_min != NULL && interval_min != NULL) {
             interval_min->count += 1;
             interval* end_interval = process_min->intervalos[ process_min->intervalos.size() - 1];
-            if (interval_min->start == end_interval->start &&
+            /*if (interval_min->start == end_interval->start &&
                 interval_min->end == end_interval->end && interval_min->count == process_min->capacity)
                     process_min->completionT = timeEnd;
+            */
             return process_min;
         }
     }
@@ -683,12 +685,13 @@ void
 scheduleEDF::executePreemptive(std::vector<gantt*>* g, int cct) {
 
     if (processes.size() > 0 && processes[0]->capacity <= 0 ) {
-        fprintf(stderr, _RED "\n\n***Error, scheduleEarliest Deadline First no se peude ejecutrar***\n\n" _RESET);
+        fprintf(stderr, _RED "\n\n***Error, scheduleEarliest Deadline First no se puede ejecutar***\n\n" _RESET);
         return;
     }
     std::vector<int> periods;
     for (int i = 0; i < processes.size(); i++)
         periods.push_back(processes[i]->period);
+
     LCM = setLeastCommonMultiple(periods);
     setIntervalos();
 
@@ -700,8 +703,9 @@ scheduleEDF::executePreemptive(std::vector<gantt*>* g, int cct) {
         string pid = "X";
         process* e = fetch(timeStart, timeEnd);
         if (e != NULL) {
-            if (e->responseT == -1)
+            /*if (e->responseT == -1)
                 e->responseT = timeStart;
+            */
             pid = e->pid;
         }
 
@@ -729,8 +733,8 @@ scheduleRM::setIntervalos() {
 
     for (i = 0; i < processes.size(); i++) {
         period = processes[i]->period;
-        limit = LCM / period;
-        start = 0;
+        limit = LCM / period; /// 20 / 5 = 4
+        start = 0; //[0, 5][5, 10][10, 15][15, 20]
         end = period;
         for (k = 0; k < limit; k++) {
             interval* e;
@@ -752,9 +756,11 @@ scheduleRM::getInterval(process* t, int timeStart, int timeEnd) {
         interval* e = t->intervalos[i];
         if (timeStart >= e->start && timeEnd < e->end && e->count < t->capacity) {
             e->count = e->count + 1;
+            /*
             interval* end_interval = t->intervalos[ t->intervalos.size() - 1];
             if (e->start == end_interval->start && e->end == end_interval->end && e->count == t->capacity)
                     t->completionT = timeEnd;
+            */
             return e;
         }
     }
@@ -777,15 +783,17 @@ void
 scheduleRM::executePreemptive(std::vector<gantt*>* g, int cct) {
 
     if (processes.size() > 0 && processes[0]->capacity <= 0 ) {
-        fprintf(stderr, _RED "\n\n***Error, RM no se peude ejecutrar***\n\n" _RESET);
+        fprintf(stderr, _RED "\n\n***Error, RM no se puede ejecutar***\n\n" _RESET);
         return;
     }
+
     std::vector<int> periods;
     for (int i = 0; i < processes.size(); i++)
         periods.push_back(processes[i]->period);
 
     LCM = setLeastCommonMultiple(periods);
     setIntervalos();
+
     sort(processes.begin(), processes.end(), scheduleRM::compare);
 
     int timeStart = 0, timeEnd = 1;
@@ -796,11 +804,11 @@ scheduleRM::executePreemptive(std::vector<gantt*>* g, int cct) {
         string pid = "X";
         process* e = fetch(timeStart, timeEnd);
         if (e != NULL) {
-            if (e->responseT == -1)
+            /*if (e->responseT == -1)
                 e->responseT = timeStart;
+            */
             pid = e->pid;
         }
-
         aGantt = new gantt {pid, timeStart, timeEnd};
         g->push_back(aGantt);
         timeStart = timeEnd;
@@ -814,6 +822,7 @@ scheduleRM::compare(process* a, process* b) {
 }
 
 std::vector<process*>
+
 scheduleRM::getProcesses() {
     return processes;
 }
